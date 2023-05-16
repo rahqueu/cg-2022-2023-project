@@ -4,6 +4,10 @@ var material, materials = new Map();
 
 var geometry, mesh;
 
+var trailer;
+
+const keys = {}, movementVector = new THREE.Vector2();
+
 function addEye(obj, x, y, z) {
     'use strict';
 
@@ -96,11 +100,11 @@ function addAbdomen(obj, x, y, z) {
     obj.add(mesh);
 }
 
-function addWheel(obj, x, y, z) {
+function addWheel(obj, m, x, y, z) {
     'use strict';
 
     geometry = new THREE.CylinderGeometry(7.5, 7.5, 10, 15);  // (0.75, 1)
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, m);
     mesh.rotation.x = Math.PI / 2;
     mesh.position.set(x, y, z);
     obj.add(mesh);
@@ -174,6 +178,58 @@ function createRobot(x, y, z) {
     addThigh(robot, 5, -15, -15); // (x, y, z)
 
     scene.add(robot);
+
+    robot.position.set(x, y, z);
+}
+
+function createTrailer(x, y, z) {
+    'use strict';
+
+    trailer = new THREE.Object3D();
+    trailer.userData = {moving: false};
+
+    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+
+    geometry = new THREE.CubeGeometry(150, 50, 50); // (5, 5, 15)
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z);
+    trailer.add(mesh);
+
+    geometry = new THREE.CubeGeometry(20, 5, 5); // (5, 5, 15)
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x + 75, y - 15, z);
+    trailer.add(mesh);
+
+    var wheel_mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+
+    addWheel(trailer, wheel_mat, x - 60, y - 25, z - 20); // (x, y, z)
+    addWheel(trailer, wheel_mat, x - 40, y - 25, z - 20); // (x, y, z)
+    addWheel(trailer, wheel_mat, x - 60, y - 25, z + 20); // (x, y, z)
+    addWheel(trailer, wheel_mat, x - 40, y - 25, z + 20); // (x, y, z)
+
+    scene.add(trailer);
+}
+
+function updateMovementVector() {
+    'use strict';
+    movementVector.set(0, 0);
+
+    if (keys['ArrowUp']) {
+        movementVector.x -= 1;
+    }
+    if (keys['ArrowDown']) {
+        movementVector.x += 1;
+    }
+    if (keys['ArrowLeft']) {
+        movementVector.y += 1;
+    }
+    if (keys['ArrowRight']) {
+        movementVector.y -= 1;
+    }
+
+    console.log(movementVector);
+
+    movementVector.normalize();
 }
 
 function createScene() {
@@ -184,7 +240,8 @@ function createScene() {
     scene.background = new THREE.Color('#ffffff')
     scene.add(new THREE.AxisHelper(150));
 
-    createRobot(0, 8, 0);
+    //createRobot(0, 0, 0);
+    createTrailer(0, 0, 0);
 }
 
 function createCameras() {
@@ -207,7 +264,15 @@ function createCameras() {
         cameras.push(camera);
     }
 
-    camera = cameras[0];
+    // to better observer movement
+    camera = new THREE.PerspectiveCamera(70,
+                                        window.innerWidth / window.innerHeight,
+                                        1,
+                                        1000);
+    camera.position.x = 250;
+    camera.position.y = 250;
+    camera.position.z = 250;
+    camera.lookAt(scene.position);
 }
 
 function onResize() {
@@ -260,14 +325,25 @@ function init() {
     createScene();
     createCameras();
 
-    render();
-
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("resize", onResize);
+
+    // handle movement
+    window.addEventListener("keydown", (e) => {
+        keys[e.code] = true;
+        updateMovementVector();
+    });
+    window.addEventListener("keyup", (e) => {
+        keys[e.code] = false;
+        updateMovementVector();
+    });
 }
 
 function animate() {
     'use strict';
+
+    trailer.position.x += movementVector.x * 5;
+    trailer.position.z += movementVector.y * 5;
 
     render();
 

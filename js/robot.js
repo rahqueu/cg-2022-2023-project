@@ -240,8 +240,8 @@ function createScene() {
     scene.background = new THREE.Color('#ffffff')
     scene.add(new THREE.AxisHelper(150));
 
-    //createRobot(0, 0, 0);
-    createTrailer(0, 0, 0);
+    createRobot(0, 0, 0);
+    //createTrailer(0, 0, 0);
 }
 
 function createCameras() {
@@ -283,7 +283,7 @@ function onResize() {
     if (window.innerHeight > 0 && window.innerWidth > 0) {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-    }
+    } 
 
 }
 
@@ -342,10 +342,12 @@ function init() {
 function animate() {
     'use strict';
 
-    trailer.position.x += movementVector.x * 5;
-    trailer.position.z += movementVector.y * 5;
+    if (trailer) {
+        trailer.position.x += movementVector.x * 5;
+        trailer.position.z += movementVector.y * 5;
+    }
 
     render();
-
     requestAnimationFrame(animate);
+    
 }

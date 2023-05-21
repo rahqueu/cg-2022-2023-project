@@ -2,7 +2,7 @@ var cameras = [], camera, scene, renderer;
 
 var geometry;
 
-var trailer, robot, head, feet, leg, arm;
+var trailer, robot, head, feet, leg, lArm, rArm;
 
 const materials = new Map();
 
@@ -39,10 +39,7 @@ function addHead(obj, x, y, z) {
     addAntenna(mesh, 0, 15, 5); // (x, y, z)
     addAntenna(mesh, 0, 15, -5); // (x, y, z)
 
-    head = new THREE.Group();
-    head.position.set(x, y - 20, z);
     mesh.add(head);
-
     head.add(mesh);
     obj.add(head);
 }
@@ -68,16 +65,15 @@ function addForearm(obj, x, y, z) {
 function addArm(obj, x, y, z) {
     'use strict';
 
-    arm = new THREE.Object3D();
-
     geometry = new THREE.CubeGeometry(20, 40, 20); // (2, 4, 2)
     var mesh = new THREE.Mesh(geometry, materials.get("arm"));
-    mesh.position.set(x, y, z);
-    arm.add(mesh)
+    mesh.position.set(0, 0, z);
 
-    addForearm(arm, x + 10, y - 30, z);
+    addForearm(mesh, x + 10, y - 30, 0);
 
-    obj.add(arm);
+    mesh.add(obj);
+    obj.add(mesh);
+    robot.add(obj);
 }
 
 function addTorso(obj, x, y, z) {
@@ -169,12 +165,23 @@ function createRobot(x, y, z) {
     addAbdomen(robot, 0, 20, 0); // (x, y, z)
     addTorso(robot, 0, 50, 0); // (x, y, z)
 
-    addHead(robot, 10, 80, 0); // (x, y, z)
-    
-    addArm(robot, 10, 50, 45); // (x, y, z)
-    addArm(robot, 10, 50, -45); // (x, y, z)
+    // head
+    head = new THREE.Group();
+    head.position.set(10, 60, 0);
 
-    // leg
+    addHead(robot, 0, 20, 0); // (x, y, z)
+
+    // arms
+    lArm = new THREE.Group();
+    lArm.position.set(10, 50, 45);
+
+    rArm = new THREE.Group();
+    rArm.position.set(10, 50, -45);
+
+    addArm(lArm, 0, 0, 0); // (x, y, z)
+    addArm(rArm, 0, 0, 0); // (x, y, z)
+
+    // legs
     leg = new THREE.Group();
     leg.position.set(5, -5, 0);
 
@@ -264,6 +271,18 @@ function rotateFeet(d) {
     }
 }
 
+function displaceArms(d) {
+    'use strict';
+
+    if (lArm.position.z < 45 && d > 0) {
+        lArm.position.z += 5;
+        rArm.position.z -= 5;
+    } else if (lArm.position.z > 25 && d < 0) {
+        lArm.position.z -= 5;
+        rArm.position.z += 5;
+    }
+}
+
 function createMaterials() {
     'use strict';
     materials.set("trailer", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: true }));
@@ -289,7 +308,7 @@ function createScene() {
     scene.background = new THREE.Color('#ffffff')
     scene.add(new THREE.AxisHelper(150));
 
-    createRobot(0, 0, 0);
+    createRobot(0, -20, 0);
     createTrailer(50, 0, -150);
 }
 
@@ -368,10 +387,10 @@ function onKeyDown(e) {
         rotateLegs(-1);
         break;
     case 69: //e
-        //displaceArm
+        displaceArms(1);
         break;
     case 68: // d
-        //displaceArm
+        displaceArms(-1);
         break;
     case 82: // r
         rotateHead(1);

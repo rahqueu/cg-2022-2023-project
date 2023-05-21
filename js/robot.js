@@ -2,7 +2,7 @@ var cameras = [], camera, scene, renderer;
 
 var geometry, mesh;
 
-var trailer;
+var trailer, robot, head, leg, arm, pivot;
 
 const materials = new Map();
 
@@ -29,21 +29,22 @@ function addAntenna(obj, x, y, z) {
 function addHead(obj, x, y, z) {
     'use strict';
 
-    var head = new THREE.Object3D();
-
     geometry = new THREE.CubeGeometry(20, 20, 30); // (2, 2, 3)
-    mesh = new THREE.Mesh(geometry, materials.get("head"));
-    mesh.position.set(x, y, z);
-    head.add(mesh);
+    var mesh = new THREE.Mesh(geometry, materials.get("head"));
+    mesh.position.set(0, 20, 0);
 
-    addEye(head, x + 11, y + 1, z + 5); // (x, y, z)
-    addEye(head, x + 11, y + 1, z - 5); // (x, y, z)
+    addEye(mesh, 11, 1, 5); // (x, y, z)
+    addEye(mesh, 11, 1, -5); // (x, y, z)
 
-    addAntenna(head, x, y + 15, z + 5); // (x, y, z)
-    addAntenna(head, x, y + 15, z - 5); // (x, y, z)
+    addAntenna(mesh, 0, 15, 5); // (x, y, z)
+    addAntenna(mesh, 0, 15, -5); // (x, y, z)
 
-    obj.add(head);
+    pivot = new THREE.Group();
+    pivot.position.set(x, y - 20, z);
+    mesh.add(pivot);
 
+    pivot.add(mesh);
+    obj.add(pivot);
 }
 
 function addExhaustPipe(obj, x, y, z) {
@@ -67,7 +68,7 @@ function addForearm(obj, x, y, z) {
 function addArm(obj, x, y, z) {
     'use strict';
 
-    var arm = new THREE.Object3D();
+    arm = new THREE.Object3D();
 
     geometry = new THREE.CubeGeometry(20, 40, 20); // (2, 4, 2)
     mesh = new THREE.Mesh(geometry, materials.get("arm"));
@@ -143,7 +144,7 @@ function addLeg(obj, x, y, z) {
 function addThigh(obj, x, y, z) {
     'use strict';
 
-    var leg = new THREE.Object3D();
+    leg = new THREE.Object3D();
 
     geometry = new THREE.CubeGeometry(10, 30, 20); // (1, 3, 2)
     mesh = new THREE.Mesh(geometry, materials.get("thigh"));
@@ -161,7 +162,7 @@ function addThigh(obj, x, y, z) {
 function createRobot(x, y, z) {
     'use strict';
 
-    var robot = new THREE.Object3D();
+    robot = new THREE.Object3D();
 
     addWaist(robot, 0, 0, 0); // (x, y, z)
     addAbdomen(robot, 0, 20, 0); // (x, y, z)
@@ -224,6 +225,16 @@ function updateMovementVector() {
     movementVector.normalize();
 }
 
+function rotateHead(d) {
+    'use strict';
+
+    if (pivot.rotation.z > 0 && d > 0){
+        pivot.rotation.z -= Math.PI / 8;
+    } else if (pivot.rotation.z < Math.PI / 2 && d < 0) {
+        pivot.rotation.z += Math.PI / 8;
+    }
+}
+
 function createMaterials() {
     'use strict';
     materials.set("trailer", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: true }));
@@ -249,8 +260,6 @@ function createScene() {
     scene.background = new THREE.Color('#ffffff')
     scene.add(new THREE.AxisHelper(150));
 
-    createMaterials();
-
     createRobot(0, 0, 0);
     createTrailer(50, 0, -150);
 }
@@ -259,9 +268,9 @@ function createCameras() {
     'use strict';
     const positions = new Array(new Array(50, 0, 0), // frontal
                                 new Array(0, 0, 50), // lateral
-                                new Array(0, 50, 0), // topo
-                                new Array(50, 50, 50), // perspetiva isométrica - projeção ortogonal
-                                new Array(50, 50, -50)); // perspetiva isométrica - projeção perspetiva
+                                new Array(0, 150, 0), // topo
+                                new Array(150, 150, 150), // perspetiva isométrica - projeção ortogonal
+                                new Array(150, 150, -150)); // perspetiva isométrica - projeção perspetiva
 
     for (let i = 0; i < 5; i++) {
         camera = new THREE.OrthographicCamera(window.innerWidth / -5,
@@ -317,6 +326,30 @@ function onKeyDown(e) {
     case 53: // 5
         camera = cameras[4];
         break;
+    case 81: // q
+        //rotateFeet
+        break;
+    case 65: // a
+        //rotateFeet
+        break;
+    case 87: // w
+        //rotateWaist
+        break;
+    case 83: // s
+        //rotateWaist
+        break;
+    case 69: //e
+        //displaceArm
+        break;
+    case 68: // d
+        //displaceArm
+        break;
+    case 82: // r
+        rotateHead(1);
+        break;
+    case 70: // f
+        rotateHead(-1);
+        break;
     case 54: // 6
         materials.forEach(value => {value.wireframe = !value.wireframe});
         break;
@@ -335,6 +368,8 @@ function init() {
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
+
+    createMaterials();
 
     createScene();
     createCameras();

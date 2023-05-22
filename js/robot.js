@@ -82,9 +82,14 @@ function addTorso(obj, x, y, z) {
     addExhaustPipe(obj, x - 19.75, y + 15, z + 35); // (x, y, z)
     addExhaustPipe(obj, x - 19.75, y + 15, z - 35); // (x, y, z)
 
-    geometry = new THREE.CubeGeometry(40, 40, 70); // (4, 4, 7)
+    geometry = new THREE.CubeGeometry(20, 40, 70); // (4, 4, 7)
     var mesh = new THREE.Mesh(geometry, materials.get("torso"));
-    mesh.position.set(x, y, z);
+    mesh.position.set(x + 10, y, z);
+    obj.add(mesh);
+
+    geometry = new THREE.CubeGeometry(20, 40, 30); // (4, 4, 7)
+    var mesh = new THREE.Mesh(geometry, materials.get("torso"));
+    mesh.position.set(x - 10, y, z);
     obj.add(mesh);
 }
 
@@ -173,10 +178,10 @@ function createRobot(x, y, z) {
 
     // arms
     lArm = new THREE.Group();
-    lArm.position.set(10, 50, 45);
+    lArm.position.set(-10, 50, 45);
 
     rArm = new THREE.Group();
-    rArm.position.set(10, 50, -45);
+    rArm.position.set(-10, 50, -45);
 
     addArm(lArm, 0, 0, 0); // (x, y, z)
     addArm(rArm, 0, 0, 0); // (x, y, z)
@@ -213,10 +218,10 @@ function createTrailer(x, y, z) {
     mesh.position.set(x + 75, y - 15, z);
     trailer.add(mesh);
 
-    addWheel(trailer, x - 60, y - 25, z - 20); // (x, y, z)
-    addWheel(trailer, x - 40, y - 25, z - 20); // (x, y, z)
-    addWheel(trailer, x - 60, y - 25, z + 20); // (x, y, z)
-    addWheel(trailer, x - 40, y - 25, z + 20); // (x, y, z)
+    addWheel(trailer, x - 60, y - 25, z - 30); // (x, y, z)
+    addWheel(trailer, x - 40, y - 25, z - 30); // (x, y, z)
+    addWheel(trailer, x - 60, y - 25, z + 30); // (x, y, z)
+    addWheel(trailer, x - 40, y - 25, z + 30); // (x, y, z)
 
     scene.add(trailer);
 }

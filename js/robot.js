@@ -4,6 +4,8 @@ var geometry;
 
 var trailer, robot, head, feet, leg, lArm, rArm;
 
+var minTruckAABB, maxTruckAABB, minTrailerAABB, maxTrailerAABB;
+
 const materials = new Map();
 
 const keys = {}, movementVector = new THREE.Vector2();
@@ -47,7 +49,7 @@ function addHead(obj, x, y, z) {
 function addExhaustPipe(obj, x, y, z) {
     'use strict';
 
-    geometry = new THREE.CylinderGeometry(0.25, 0.25, 40, 15);  // (0.25, 4)
+    geometry = new THREE.CylinderGeometry(1, 1, 40, 15);  // (0.25, 4)
     var mesh = new THREE.Mesh(geometry, materials.get("pipe"));
     mesh.position.set(x, y, z);
     obj.add(mesh);
@@ -69,6 +71,7 @@ function addArm(obj, x, y, z) {
     var mesh = new THREE.Mesh(geometry, materials.get("arm"));
     mesh.position.set(0, 0, z);
 
+    addExhaustPipe(mesh, x - 10, y + 15, obj.position.z > 0 ? z + 9 : z - 9); // (x, y, z)
     addForearm(mesh, x + 10, y - 30, 0);
 
     mesh.add(obj);
@@ -78,9 +81,6 @@ function addArm(obj, x, y, z) {
 
 function addTorso(obj, x, y, z) {
     'use strict';
-
-    addExhaustPipe(obj, x - 19.75, y + 15, z + 35); // (x, y, z)
-    addExhaustPipe(obj, x - 19.75, y + 15, z - 35); // (x, y, z)
 
     geometry = new THREE.CubeGeometry(20, 40, 70); // (4, 4, 7)
     var mesh = new THREE.Mesh(geometry, materials.get("torso"));
@@ -96,7 +96,7 @@ function addTorso(obj, x, y, z) {
 function addAbdomen(obj, x, y, z) {
     'use strict';
 
-    geometry = new THREE.CubeGeometry(40, 20, 20); // (4, 2, 2)
+    geometry = new THREE.CubeGeometry(40, 20, 30); // (4, 2, 2)
     var mesh = new THREE.Mesh(geometry, materials.get("abdomen"));
     mesh.position.set(x, y, z);
     obj.add(mesh);
@@ -165,6 +165,7 @@ function createRobot(x, y, z) {
     'use strict';
 
     robot = new THREE.Object3D();
+    robot.userData = {truck: false};
 
     addWaist(robot, 0, 0, 0); // (x, y, z)
     addAbdomen(robot, 0, 20, 0); // (x, y, z)
@@ -208,22 +209,19 @@ function createTrailer(x, y, z) {
     trailer = new THREE.Object3D();
     trailer.userData = {moving: false};
 
-    geometry = new THREE.CubeGeometry(150, 50, 50); // (5, 5, 15)
+    geometry = new THREE.CubeGeometry(150, 80, 50); // (5, 5, 15)
     var mesh = new THREE.Mesh(geometry, materials.get("trailer"));
-    mesh.position.set(x, y, z);
+    mesh.position.set(x, y + 15, z);
     trailer.add(mesh);
 
-    geometry = new THREE.CubeGeometry(20, 5, 5); // (5, 5, 15)
-    mesh = new THREE.Mesh(geometry, materials.get("trailer"));
-    mesh.position.set(x + 75, y - 15, z);
-    trailer.add(mesh);
-
-    addWheel(trailer, x - 60, y - 25, z - 30); // (x, y, z)
-    addWheel(trailer, x - 40, y - 25, z - 30); // (x, y, z)
-    addWheel(trailer, x - 60, y - 25, z + 30); // (x, y, z)
-    addWheel(trailer, x - 40, y - 25, z + 30); // (x, y, z)
+    addWheel(trailer, x - 60, y - 22.5, z - 30); // (x, y, z)
+    addWheel(trailer, x - 40, y - 22.5, z - 30); // (x, y, z)
+    addWheel(trailer, x - 60, y - 22.5, z + 30); // (x, y, z)
+    addWheel(trailer, x - 40, y - 22.5, z + 30); // (x, y, z)
 
     scene.add(trailer);
+
+    trailer.position.set(x, y, z);
 }
 
 function updateMovementVector() {
@@ -246,6 +244,16 @@ function updateMovementVector() {
     movementVector.normalize();
 }
 
+function checkTruckMode() {
+    'use strict';
+
+    robot.userData.truck = head.rotation.z == Math.PI / 2 &&
+                            leg.rotation.z ==  - Math.PI / 2 &&
+                            feet.rotation.z == - Math.PI / 2 &&
+                            lArm.position.z == 25 && rArm.position.z == -25;
+    console.log(robot.userData.truck);
+}
+
 function rotateHead(d) {
     'use strict';
 
@@ -253,6 +261,7 @@ function rotateHead(d) {
         head.rotation.z -= Math.PI / 8;
     } else if (head.rotation.z < Math.PI / 2 && d < 0) {
         head.rotation.z += Math.PI / 8;
+        checkTruckMode();
     }
 }
 
@@ -263,6 +272,7 @@ function rotateLegs(d) {
         leg.rotation.z += Math.PI / 8;
     } else if (leg.rotation.z > - Math.PI / 2 && d < 0) {
         leg.rotation.z -= Math.PI / 8;
+        checkTruckMode();
     }
 }
 
@@ -273,6 +283,7 @@ function rotateFeet(d) {
         feet.rotation.z += Math.PI / 8;
     } else if (feet.rotation.z > - Math.PI / 2 && d < 0) {
         feet.rotation.z -= Math.PI / 8;
+        checkTruckMode();
     }
 }
 
@@ -285,24 +296,51 @@ function displaceArms(d) {
     } else if (lArm.position.z > 25 && d < 0) {
         lArm.position.z -= 5;
         rArm.position.z += 5;
+        checkTruckMode();
     }
 }
 
+function checkCollision() {
+    'use strict';
+
+    if (maxTruckAABB.x > minTrailerAABB.x &&
+        minTruckAABB.x < maxTrailerAABB.x &&
+        maxTruckAABB.y > minTrailerAABB.y &&
+        minTruckAABB.y < maxTrailerAABB.y &&
+        maxTruckAABB.z > minTrailerAABB.z &&
+        minTruckAABB.z < maxTrailerAABB.z
+    ) {
+        console.log('looooool')
+    }
+}  
+
 function createMaterials() {
     'use strict';
-    materials.set("trailer", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: true }));
-    materials.set("wheel", new THREE.MeshBasicMaterial({ color: 0x00000, wireframe: true }));
-    materials.set("torso", new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true }));
-    materials.set("abdomen", new THREE.MeshBasicMaterial({ color: 0xa6a6a6, wireframe: true }));
-    materials.set("waist", new THREE.MeshBasicMaterial({ color: 0xa6a6a6, wireframe: true }));
-    materials.set("arm", new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true }));
-    materials.set("leg", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true }));
-    materials.set("thigh", new THREE.MeshBasicMaterial({ color: 0xa6a6a6, wireframe: true }));
-    materials.set("head", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true }));
-    materials.set("antenna", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true }));
-    materials.set("eye", new THREE.MeshBasicMaterial({ color: 0xa6a6a6, wireframe: true }));
-    materials.set("foot", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true }));
-    materials.set("pipe", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: true }));
+    materials.set("trailer", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false }));
+    materials.set("wheel", new THREE.MeshBasicMaterial({ color: 0x00000, wireframe: false }));
+    materials.set("torso", new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: false }));
+    materials.set("abdomen", new THREE.MeshBasicMaterial({ color: 0xa6a6a6, wireframe: false }));
+    materials.set("waist", new THREE.MeshBasicMaterial({ color: 0xa6a6a6, wireframe: false }));
+    materials.set("arm", new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: false }));
+    materials.set("leg", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false }));
+    materials.set("thigh", new THREE.MeshBasicMaterial({ color: 0xa6a6a6, wireframe: false }));
+    materials.set("head", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false }));
+    materials.set("antenna", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false }));
+    materials.set("eye", new THREE.MeshBasicMaterial({ color: 0xa6a6a6, wireframe: false }));
+    materials.set("foot", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false }));
+    materials.set("pipe", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false }));
+}
+
+function updateAABBs() {
+    'use strict';
+
+    // 120, 80, 70
+    minTruckAABB = new THREE.Vector3(-120 / 2 - 40, 0, -70 / 2);
+    maxTruckAABB = new THREE.Vector3(120 / 2 - 40, 80, 70 / 2);
+    
+    // 150, 80, 50
+    minTrailerAABB = new THREE.Vector3(trailer.position.x - 150 / 2, trailer.position.y - 80 / 2, trailer.position.z - 50 / 2);
+    maxTrailerAABB = new THREE.Vector3(trailer.position.x + 150 / 2, trailer.position.y + 80 / 2, trailer.position.z + 50 / 2);
 }
 
 function createScene() {
@@ -313,8 +351,8 @@ function createScene() {
     scene.background = new THREE.Color('#ffffff')
     scene.add(new THREE.AxisHelper(150));
 
-    createRobot(0, -20, 0);
-    createTrailer(50, 0, -150);
+    createRobot(0, 15, 0);
+    createTrailer(0, 15, 0);
 }
 
 function createCameras() {
@@ -423,7 +461,6 @@ function init() {
     document.body.appendChild(renderer.domElement);
 
     createMaterials();
-
     createScene();
     createCameras();
 
@@ -445,8 +482,13 @@ function animate() {
     'use strict';
 
     if (trailer) {
-        trailer.position.x += movementVector.x * 5;
-        trailer.position.z += movementVector.y * 5;
+        trailer.position.x += movementVector.x * 1;
+        trailer.position.z += movementVector.y * 1;
+        updateAABBs();
+    }
+
+    if (robot && robot.userData.truck) {
+        checkCollision();
     }
 
     render();

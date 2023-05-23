@@ -4,11 +4,17 @@ var geometry;
 
 var trailer, robot, head, feet, leg, lArm, rArm;
 
-var minTruckAABB, maxTruckAABB, minTrailerAABB, maxTrailerAABB;
+var minTruckAABB = new THREE.Vector3(-120 / 2 - 40, 0, -70 / 2), maxTruckAABB = new THREE.Vector3(120 / 2 - 40, 80, 70 / 2), minTrailerAABB, maxTrailerAABB;
 
-const materials = new Map();
+const materials = new Map(), clock = new THREE.Clock();
 
-const keys = {}, movementVector = new THREE.Vector2();
+const keys = {}, movementVector = new THREE.Vector2(0, 0);
+
+// ANIMATION
+const duration = 200; // duration (in milliseconds)
+var time = 0;
+const targetPos = new THREE.Vector3(-95, 30, 0); // final position of the trailer
+let displacement;
 
 function addEye(obj, x, y, z) {
     'use strict';
@@ -207,24 +213,30 @@ function createTrailer(x, y, z) {
     'use strict';
 
     trailer = new THREE.Object3D();
-    trailer.userData = {moving: false};
+    trailer.userData = {engaging: false, engaged:false, displacement: new THREE.Vector3(0, 0, 0)};
 
-    geometry = new THREE.CubeGeometry(150, 80, 50); // (5, 5, 15)
+    geometry = new THREE.CubeGeometry(150, 80, 70); // (5, 5, 15)
     var mesh = new THREE.Mesh(geometry, materials.get("trailer"));
-    mesh.position.set(x, y + 15, z);
+    mesh.position.set(0, 25, 0);
     trailer.add(mesh);
 
-    addWheel(trailer, x - 60, y - 22.5, z - 30); // (x, y, z)
-    addWheel(trailer, x - 40, y - 22.5, z - 30); // (x, y, z)
-    addWheel(trailer, x - 60, y - 22.5, z + 30); // (x, y, z)
-    addWheel(trailer, x - 40, y - 22.5, z + 30); // (x, y, z)
+    geometry = new THREE.CubeGeometry(50, 10, 70); // (5, 5, 15)
+    var mesh = new THREE.Mesh(geometry, materials.get("trailer"));
+    mesh.position.set(-40, -20, 0);
+    trailer.add(mesh);
+
+    addWheel(trailer, -60, -22.5, -40); // (x, y, z)
+    addWheel(trailer, -20, -22.5, -40); // (x, y, z)
+    addWheel(trailer, -60, -22.5, 40); // (x, y, z)
+    addWheel(trailer, -20, -22.5, 40); // (x, y, z)
 
     scene.add(trailer);
 
     trailer.position.set(x, y, z);
+    updateTrailerAABB();
 }
 
-function updateMovementVector() {
+function updateMovement() {
     'use strict';
     movementVector.set(0, 0);
 
@@ -244,6 +256,57 @@ function updateMovementVector() {
     movementVector.normalize();
 }
 
+function updateTruckPosition() {
+    'use strict';
+
+    const tentativeX = trailer.position.x + movementVector.x * 2.5;
+    const tentativeZ = trailer.position.z + movementVector.y * 2.5;
+
+    return new THREE.Vector2(tentativeX, tentativeZ);
+}
+
+function updateTrailerAABB(x, z) {
+    'use strict';
+    
+    // 150, 90, 70
+    minTrailerAABB = new THREE.Vector3(x - 150 / 2, trailer.position.y - 90 / 2 + 15, z - 70 / 2);
+    maxTrailerAABB = new THREE.Vector3(x + 150 / 2, trailer.position.y + 90 / 2 + 15, z + 70 / 2);
+}
+
+function computeDisplacement() {
+    if (!trailer.userData.engaging) {
+        const currPos = trailer.position.clone();
+        const mx = (targetPos.x - currPos.x) / duration;
+        const my = (targetPos.y - currPos.y) / duration;
+        const mz = (targetPos.z - currPos.z) / duration;
+        displacement = new THREE.Vector3(mx, my, mz);
+    }
+}
+
+function checkCollision(pos) {
+    'use strict';
+
+    updateTrailerAABB(pos.x, pos.y);
+
+    var newPos = pos;
+
+    if (maxTruckAABB.x > minTrailerAABB.x && minTruckAABB.x < maxTrailerAABB.x &&
+        maxTruckAABB.y > minTrailerAABB.y && minTruckAABB.y < maxTrailerAABB.y &&
+        maxTruckAABB.z > minTrailerAABB.z && minTruckAABB.z < maxTrailerAABB.z) 
+    {   
+        if (!trailer.userData.engaged) { // collision detected and trailer is not engaged -> engage (animation)
+            computeDisplacement();
+            trailer.userData.engaging = true;
+            newPos.x = trailer.position.x;
+            newPos.y = trailer.position.z;
+        }
+    } else {
+        trailer.userData.engaged = false;
+    }
+
+    return newPos;
+}  
+
 function checkTruckMode() {
     'use strict';
 
@@ -251,7 +314,6 @@ function checkTruckMode() {
                             leg.rotation.z ==  - Math.PI / 2 &&
                             feet.rotation.z == - Math.PI / 2 &&
                             lArm.position.z == 25 && rArm.position.z == -25;
-    console.log(robot.userData.truck);
 }
 
 function rotateHead(d) {
@@ -261,8 +323,8 @@ function rotateHead(d) {
         head.rotation.z -= Math.PI / 8;
     } else if (head.rotation.z < Math.PI / 2 && d < 0) {
         head.rotation.z += Math.PI / 8;
-        checkTruckMode();
     }
+    checkTruckMode();
 }
 
 function rotateLegs(d) {
@@ -272,8 +334,8 @@ function rotateLegs(d) {
         leg.rotation.z += Math.PI / 8;
     } else if (leg.rotation.z > - Math.PI / 2 && d < 0) {
         leg.rotation.z -= Math.PI / 8;
-        checkTruckMode();
     }
+    checkTruckMode();
 }
 
 function rotateFeet(d) {
@@ -283,8 +345,8 @@ function rotateFeet(d) {
         feet.rotation.z += Math.PI / 8;
     } else if (feet.rotation.z > - Math.PI / 2 && d < 0) {
         feet.rotation.z -= Math.PI / 8;
-        checkTruckMode();
     }
+    checkTruckMode();
 }
 
 function displaceArms(d) {
@@ -296,23 +358,9 @@ function displaceArms(d) {
     } else if (lArm.position.z > 25 && d < 0) {
         lArm.position.z -= 5;
         rArm.position.z += 5;
-        checkTruckMode();
     }
+    checkTruckMode();
 }
-
-function checkCollision() {
-    'use strict';
-
-    if (maxTruckAABB.x > minTrailerAABB.x &&
-        minTruckAABB.x < maxTrailerAABB.x &&
-        maxTruckAABB.y > minTrailerAABB.y &&
-        minTruckAABB.y < maxTrailerAABB.y &&
-        maxTruckAABB.z > minTrailerAABB.z &&
-        minTruckAABB.z < maxTrailerAABB.z
-    ) {
-        console.log('looooool')
-    }
-}  
 
 function createMaterials() {
     'use strict';
@@ -331,18 +379,6 @@ function createMaterials() {
     materials.set("pipe", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false }));
 }
 
-function updateAABBs() {
-    'use strict';
-
-    // 120, 80, 70
-    minTruckAABB = new THREE.Vector3(-120 / 2 - 40, 0, -70 / 2);
-    maxTruckAABB = new THREE.Vector3(120 / 2 - 40, 80, 70 / 2);
-    
-    // 150, 80, 50
-    minTrailerAABB = new THREE.Vector3(trailer.position.x - 150 / 2, trailer.position.y - 80 / 2, trailer.position.z - 50 / 2);
-    maxTrailerAABB = new THREE.Vector3(trailer.position.x + 150 / 2, trailer.position.y + 80 / 2, trailer.position.z + 50 / 2);
-}
-
 function createScene() {
     'use strict';
 
@@ -352,7 +388,7 @@ function createScene() {
     scene.add(new THREE.AxisHelper(150));
 
     createRobot(0, 15, 0);
-    createTrailer(0, 15, 0);
+    createTrailer(0, 30, -150);
 }
 
 function createCameras() {
@@ -401,6 +437,7 @@ function onResize() {
 function onKeyDown(e) {
     'use strict';
 
+    if (!trailer.userData.engaging)
     switch (e.keyCode) {
     case 49: // 1
         camera = cameras[0];
@@ -418,28 +455,28 @@ function onKeyDown(e) {
         camera = cameras[4];
         break;
     case 81: // q
-        rotateFeet(1);
+        if (!trailer.userData.engaging) rotateFeet(1);
         break;
     case 65: // a
-        rotateFeet(-1);
+        if (!trailer.userData.engaging) rotateFeet(-1);
         break;
     case 87: // w
-        rotateLegs(1);
+        if (!trailer.userData.engaging) rotateLegs(1);
         break;
     case 83: // s
-        rotateLegs(-1);
+        if (!trailer.userData.engaging) rotateLegs(-1);
         break;
     case 69: //e
-        displaceArms(1);
+        if (!trailer.userData.engaging) displaceArms(1);
         break;
     case 68: // d
-        displaceArms(-1);
+        if (!trailer.userData.engaging) displaceArms(-1);
         break;
     case 82: // r
-        rotateHead(1);
+        if (!trailer.userData.engaging) rotateHead(1);
         break;
     case 70: // f
-        rotateHead(-1);
+        if (!trailer.userData.engaging) rotateHead(-1);
         break;
     case 54: // 6
         materials.forEach(value => {value.wireframe = !value.wireframe});
@@ -469,26 +506,38 @@ function init() {
 
     // handle movement
     window.addEventListener("keydown", (e) => {
-        keys[e.code] = true;
-        updateMovementVector();
+        if (!trailer.userData.engaging) keys[e.code] = true;
+        updateMovement();
     });
     window.addEventListener("keyup", (e) => {
         keys[e.code] = false;
-        updateMovementVector();
+        updateMovement();
     });
 }
 
 function animate() {
     'use strict';
-
-    if (trailer) {
-        trailer.position.x += movementVector.x * 1;
-        trailer.position.z += movementVector.y * 1;
-        updateAABBs();
-    }
-
-    if (robot && robot.userData.truck) {
-        checkCollision();
+    
+    if (!trailer.userData.engaging) { // trailer is free to move around
+        var tentativePos = updateTruckPosition();
+        var currentPos;
+        
+        if (robot.userData.truck) { // check collision (truck mode && trailer not engaged)
+            currentPos = checkCollision(tentativePos);
+        } else {
+            currentPos = tentativePos;
+        }
+        trailer.position.x = currentPos.x;
+        trailer.position.z = currentPos.y;
+        updateTrailerAABB(trailer.position.x, trailer.position.z);
+    } else if (time < duration) { // collision detected -> animation
+        trailer.position.add(displacement);
+        time++;
+    } else { // end of animation, trailer/robot free to move
+        trailer.position.set(-95, 30, 0);
+        trailer.userData.engaging = false;
+        trailer.userData.engaged = true;
+        time = 0;
     }
 
     render();

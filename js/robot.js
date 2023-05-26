@@ -4,15 +4,20 @@ var geometry;
 
 var trailer, robot, head, feet, leg, lArm, rArm;
 
+let rotateHeadIn = false, rotateHeadOut = false, rotateLegIn = false, rotateLegOut = false,
+    rotateFeetIn = false, rotateFeetOut = false, displaceArmsIn = false, displaceArmsOut = false;
+
 var minTruckAABB = new THREE.Vector3(-120 / 2 - 40, 0, -70 / 2), maxTruckAABB = new THREE.Vector3(120 / 2 - 40, 80, 70 / 2), minTrailerAABB, maxTrailerAABB;
 
 const materials = new Map(), clock = new THREE.Clock();
+var delta;
 
 const keys = {}, movementVector = new THREE.Vector2(0, 0);
 
 // ANIMATION
-const duration = 200; // duration (in milliseconds)
-var time = 0;
+const duration = 5; // duration (in seconds)
+const animationSpeed = 2;
+var elapsed = 0;
 const targetPos = new THREE.Vector3(-95, 30, 0); // final position of the trailer
 let displacement;
 
@@ -241,26 +246,24 @@ function updateMovement() {
     movementVector.set(0, 0);
 
     if (keys['ArrowUp']) {
-        movementVector.x -= 1;
+        movementVector.x -= 100;
     }
     if (keys['ArrowDown']) {
-        movementVector.x += 1;
+        movementVector.x += 100;
     }
     if (keys['ArrowLeft']) {
-        movementVector.y += 1;
+        movementVector.y += 100;
     }
     if (keys['ArrowRight']) {
-        movementVector.y -= 1;
+        movementVector.y -= 100;
     }
-
-    movementVector.normalize();
 }
 
-function updateTruckPosition() {
+function updateTruckPosition(delta) {
     'use strict';
 
-    const tentativeX = trailer.position.x + movementVector.x * 2.5;
-    const tentativeZ = trailer.position.z + movementVector.y * 2.5;
+    const tentativeX = trailer.position.x + movementVector.x * delta;
+    const tentativeZ = trailer.position.z + movementVector.y * delta;
 
     return new THREE.Vector2(tentativeX, tentativeZ);
 }
@@ -273,20 +276,17 @@ function updateTrailerAABB(x, z) {
     maxTrailerAABB = new THREE.Vector3(x + 150 / 2, trailer.position.y + 90 / 2 + 15, z + 70 / 2);
 }
 
-function computeDisplacement() {
-    if (!trailer.userData.engaging) {
-        const currPos = trailer.position.clone();
-        const mx = (targetPos.x - currPos.x) / duration;
-        const my = (targetPos.y - currPos.y) / duration;
-        const mz = (targetPos.z - currPos.z) / duration;
-        displacement = new THREE.Vector3(mx, my, mz);
-    }
+function computeDisplacement(delta) {
+    const currentPos = trailer.position.clone();
+    const distance = targetPos.clone().sub(currentPos);
+    const velocity = distance.clone().divideScalar(duration).multiplyScalar(animationSpeed);
+    displacement = velocity.clone().multiplyScalar(delta);
 }
 
-function checkCollision(pos) {
+function checkCollision(delta, pos) {
     'use strict';
 
-    updateTrailerAABB(pos.x, pos.y);
+    updateTrailerAABB(pos.x, pos.y); // check collision with tentativePos values
 
     var newPos = pos;
 
@@ -295,7 +295,7 @@ function checkCollision(pos) {
         maxTruckAABB.z > minTrailerAABB.z && minTruckAABB.z < maxTrailerAABB.z) 
     {   
         if (!trailer.userData.engaged) { // collision detected and trailer is not engaged -> engage (animation)
-            computeDisplacement();
+            computeDisplacement(delta);
             trailer.userData.engaging = true;
             newPos.x = trailer.position.x;
             newPos.y = trailer.position.z;
@@ -314,50 +314,45 @@ function checkTruckMode() {
                             leg.rotation.z ==  - Math.PI / 2 &&
                             feet.rotation.z == - Math.PI / 2 &&
                             lArm.position.z == 25 && rArm.position.z == -25;
+
+    if (!robot.userData.truck) trailer.userData.engaged = false; 
 }
 
-function rotateHead(d) {
+function handleRotations(delta) {
     'use strict';
-
-    if (head.rotation.z > 0 && d > 0){
-        head.rotation.z -= Math.PI / 8;
-    } else if (head.rotation.z < Math.PI / 2 && d < 0) {
-        head.rotation.z += Math.PI / 8;
+    if (rotateFeetIn) {
+        feet.rotation.z = THREE.Math.clamp(feet.rotation.z + delta * 5, - Math.PI / 2, 0);
+        rotateFeetIn = false;
     }
-    checkTruckMode();
-}
-
-function rotateLegs(d) {
-    'use strict';
-
-    if (leg.rotation.z < 0 && d > 0){
-        leg.rotation.z += Math.PI / 8;
-    } else if (leg.rotation.z > - Math.PI / 2 && d < 0) {
-        leg.rotation.z -= Math.PI / 8;
+    if (rotateFeetOut) {
+        feet.rotation.z = THREE.Math.clamp(feet.rotation.z - delta * 5, - Math.PI / 2, 0);
+        rotateFeetOut = false;
     }
-    checkTruckMode();
-}
-
-function rotateFeet(d) {
-    'use strict';
-
-    if (feet.rotation.z < 0 && d > 0){
-        feet.rotation.z += Math.PI / 8;
-    } else if (feet.rotation.z > - Math.PI / 2 && d < 0) {
-        feet.rotation.z -= Math.PI / 8;
+    if (rotateLegIn) {
+        leg.rotation.z = THREE.Math.clamp(leg.rotation.z + delta * 5, - Math.PI / 2, 0);
+        rotateLegIn = false;
     }
-    checkTruckMode();
-}
-
-function displaceArms(d) {
-    'use strict';
-
-    if (lArm.position.z < 45 && d > 0) {
-        lArm.position.z += 5;
-        rArm.position.z -= 5;
-    } else if (lArm.position.z > 25 && d < 0) {
-        lArm.position.z -= 5;
-        rArm.position.z += 5;
+    if (rotateLegOut) {
+        leg.rotation.z = THREE.Math.clamp(leg.rotation.z - delta * 5, - Math.PI / 2, 0);
+        rotateLegOut = false;
+    }
+    if (rotateHeadIn) {
+        head.rotation.z = THREE.Math.clamp(head.rotation.z - delta * 5, 0, Math.PI / 2);
+        rotateHeadIn = false;
+    }
+    if (rotateHeadOut) {
+        head.rotation.z = THREE.Math.clamp(head.rotation.z + delta * 5, 0, Math.PI / 2);
+        rotateHeadOut = false;
+    }
+    if (displaceArmsIn) {
+        lArm.position.z = THREE.Math.clamp(lArm.position.z + delta * 50, 25, 45);
+        rArm.position.z = THREE.Math.clamp(rArm.position.z - delta * 50, -45, -25);
+        displaceArmsIn = false;
+    }
+    if (displaceArmsOut) {
+        lArm.position.z = THREE.Math.clamp(lArm.position.z - delta * 50, 25, 45);
+        rArm.position.z = THREE.Math.clamp(rArm.position.z + delta * 50, -45, -25);
+        displaceArmsOut = false;
     }
     checkTruckMode();
 }
@@ -388,7 +383,7 @@ function createScene() {
     scene.add(new THREE.AxisHelper(150));
 
     createRobot(0, 15, 0);
-    createTrailer(0, 30, -150);
+    createTrailer(-150, 30, 0);
 }
 
 function createCameras() {
@@ -396,30 +391,26 @@ function createCameras() {
     const positions = new Array(new Array(50, 0, 0), // frontal
                                 new Array(0, 0, 50), // lateral
                                 new Array(0, 150, 0), // topo
-                                new Array(150, 150, 150), // perspetiva isométrica - projeção ortogonal
-                                new Array(150, 150, -150)); // perspetiva isométrica - projeção perspetiva
+                                new Array(150, 100, 150), // perspetiva isométrica - projeção ortogonal
+                                new Array(500, 500, 500)); // perspetiva isométrica - projeção perspetiva
 
     for (let i = 0; i < 5; i++) {
-        camera = new THREE.OrthographicCamera(window.innerWidth / -5,
+        if (i == 4) {
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
+        } else {
+            camera = new THREE.OrthographicCamera(window.innerWidth / -5,
                                             window.innerWidth / 5,
                                             window.innerHeight / 5,
                                             window.innerHeight / -5,
                                             1,
                                             1000);
+        }
+
         camera.position.set(positions[i][0], positions[i][1], positions[i][2]);
         camera.lookAt(scene.position);
         cameras.push(camera);
     }
-
-    // to better observer movement
-    camera = new THREE.PerspectiveCamera(70,
-                                        window.innerWidth / window.innerHeight,
-                                        1,
-                                        1000);
-    camera.position.x = 250;
-    camera.position.y = 250;
-    camera.position.z = 250;
-    camera.lookAt(scene.position);
+    camera = cameras[0];
 }
 
 function onResize() {
@@ -437,8 +428,13 @@ function onResize() {
 function onKeyDown(e) {
     'use strict';
 
-    if (!trailer.userData.engaging)
     switch (e.keyCode) {
+    case 37: // 1
+    case 38: // 1
+    case 39: // 1
+    case 40: // 1
+        if (!trailer.userData.engaging) keys[e.code] = true;
+        break;
     case 49: // 1
         camera = cameras[0];
         break;
@@ -455,28 +451,28 @@ function onKeyDown(e) {
         camera = cameras[4];
         break;
     case 81: // q
-        if (!trailer.userData.engaging) rotateFeet(1);
+        rotateFeetIn = true;
         break;
     case 65: // a
-        if (!trailer.userData.engaging) rotateFeet(-1);
+        rotateFeetOut = true;
         break;
     case 87: // w
-        if (!trailer.userData.engaging) rotateLegs(1);
+        rotateLegIn = true;
         break;
     case 83: // s
-        if (!trailer.userData.engaging) rotateLegs(-1);
+        rotateLegOut = true;
         break;
     case 69: //e
-        if (!trailer.userData.engaging) displaceArms(1);
+        displaceArmsIn = true;
         break;
     case 68: // d
-        if (!trailer.userData.engaging) displaceArms(-1);
+        displaceArmsOut = true;
         break;
     case 82: // r
-        if (!trailer.userData.engaging) rotateHead(1);
+        rotateHeadIn = true;
         break;
     case 70: // f
-        if (!trailer.userData.engaging) rotateHead(-1);
+        rotateHeadOut = true;
         break;
     case 54: // 6
         materials.forEach(value => {value.wireframe = !value.wireframe});
@@ -497,6 +493,8 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    clock.start();
+
     createMaterials();
     createScene();
     createCameras();
@@ -504,40 +502,37 @@ function init() {
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("resize", onResize);
 
-    // handle movement
-    window.addEventListener("keydown", (e) => {
-        if (!trailer.userData.engaging) keys[e.code] = true;
-        updateMovement();
-    });
-    window.addEventListener("keyup", (e) => {
-        keys[e.code] = false;
-        updateMovement();
-    });
+    window.addEventListener("keyup", (e) => { keys[e.code] = false; });
 }
 
 function animate() {
     'use strict';
+
+    delta = clock.getDelta();
     
     if (!trailer.userData.engaging) { // trailer is free to move around
-        var tentativePos = updateTruckPosition();
+        handleRotations(delta);
+        updateMovement();
+
+        var tentativePos = updateTruckPosition(delta);
         var currentPos;
         
         if (robot.userData.truck) { // check collision (truck mode && trailer not engaged)
-            currentPos = checkCollision(tentativePos);
+            currentPos = checkCollision(delta, tentativePos);
         } else {
             currentPos = tentativePos;
         }
         trailer.position.x = currentPos.x;
         trailer.position.z = currentPos.y;
         updateTrailerAABB(trailer.position.x, trailer.position.z);
-    } else if (time < duration) { // collision detected -> animation
+    } else if (elapsed < duration) { // animation
         trailer.position.add(displacement);
-        time++;
+        elapsed += delta * animationSpeed;
     } else { // end of animation, trailer/robot free to move
-        trailer.position.set(-95, 30, 0);
+        trailer.position.set(-95, 30, 0); // garantee trailer is in the right position
         trailer.userData.engaging = false;
         trailer.userData.engaged = true;
-        time = 0;
+        elapsed = 0;
     }
 
     render();

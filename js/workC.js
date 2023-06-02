@@ -6,7 +6,7 @@ var cameras = [], camera, scene, renderer;
 
 var geometry, mesh;
 
-var moon, ovni;
+var moon, ovni, ground, skydome;
 
 const materials = new Map(), clock = new THREE.Clock();
 var delta;
@@ -25,6 +25,8 @@ function createScene(){
 
     createMoon();
     createOVNI(5, 7.5, 0);
+    createGround();
+    createSkydome();
 }
 
 //////////////////////
@@ -73,11 +75,13 @@ function createCameras() {
 
 function createMaterials() {
     'use strict';
-    materials.set("moon", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false }));
+    materials.set("moon", new THREE.MeshBasicMaterial({ color: 0xfcba03, wireframe: false }));
     materials.set("ovni", new THREE.MeshBasicMaterial({ color: 0x707070, wireframe: false }));
     materials.set("cockpit", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false }));
-    materials.set("beam", new THREE.MeshBasicMaterial({ color: 0xC0C0C0, wireframe: false }));
-    materials.set("light", new THREE.MeshBasicMaterial({ color: 0xeeeeee, wireframe: false }));
+    materials.set("beam", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false }));
+    materials.set("light", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false }));
+    materials.set("ground", new THREE.MeshBasicMaterial({ color: 0x2b4a22, wireframe: false }));
+    materials.set("skydome", new THREE.MeshBasicMaterial({ color: 0x191138, wireframe: false }));
     /*
     materials.set("trailer", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false }));
     materials.set("wheel", new THREE.MeshBasicMaterial({ color: 0x00000, wireframe: false }));
@@ -155,6 +159,34 @@ function createOVNI(x, y, z) {
 
     ovni.position.set(x, y, z);
     scene.add(ovni);
+}
+
+function createGround() {
+    'use strict';
+
+    ground = new THREE.Object3D();
+
+    geometry = new THREE.BoxGeometry(40, 1, 40);
+    mesh = new THREE.Mesh(geometry, materials.get("ground"));
+    ground.add(mesh);
+    ground.position.set(0, 0, 0);
+
+    scene.add(ground);
+}
+
+function createSkydome() {
+    'use strict';
+
+    skydome = new THREE.Object3D();
+
+    geometry = new THREE.SphereGeometry( 30, 9, 30, Math.PI, Math.PI, 3*Math.PI/2);
+    mesh = new THREE.Mesh(geometry, materials.get("skydome"));
+    mesh.material.side = THREE.DoubleSide;
+
+    skydome.add(mesh);
+    skydome.position.set(0, 0, 0);
+
+    scene.add(skydome);
 }
 
 //////////////////////
@@ -263,7 +295,7 @@ function onKeyDown(e) {
     'use strict';
 
     switch (e.keyCode) {
-        case 49: // 1
+        case 49: // 1 -> camera fixa projecção perspectiva para ver toda a cena
             camera = cameras[0];
             break;
         case 50: // 2
@@ -284,6 +316,14 @@ function onKeyDown(e) {
         case 40: // arrow
             keys[e.code] = true;
             break;
+        // q -> sombreamento Gouraud
+        // w -> sombreamento Phong
+        // e -> sombreamento Cartoon
+        // r -> ativar e desativar o cálculo da iluminação
+
+        // p -> ativar/desativar luzes pontuais
+        // s -> ativar/desativar luz spotlight
+        // d -> ativar/desativar luz global (lua cheia)
     }
 }
 

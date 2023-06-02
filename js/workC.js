@@ -75,11 +75,11 @@ function createCameras() {
 
 function createMaterials() {
     'use strict';
-    materials.set("moon", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false }));
+    materials.set("moon", new THREE.MeshBasicMaterial({ color: 0xfcba03, wireframe: false }));
     materials.set("ovni", new THREE.MeshBasicMaterial({ color: 0x707070, wireframe: false }));
     materials.set("cockpit", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false }));
-    materials.set("beam", new THREE.MeshBasicMaterial({ color: 0xC0C0C0, wireframe: false }));
-    materials.set("light", new THREE.MeshBasicMaterial({ color: 0xeeeeee, wireframe: false }));
+    materials.set("beam", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false }));
+    materials.set("light", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false }));
 }
 
 function setVertices(xi, yi, zi, xf, yf, zf) {
@@ -321,7 +321,7 @@ function onKeyDown(e) {
     'use strict';
 
     switch (e.keyCode) {
-        case 49: // 1
+        case 49: // 1 -> camera fixa projecção perspectiva para ver toda a cena
             camera = cameras[0];
             break;
         case 50: // 2
@@ -345,6 +345,14 @@ function onKeyDown(e) {
         case 40: // arrow
             keys[e.code] = true;
             break;
+        // q -> sombreamento Gouraud
+        // w -> sombreamento Phong
+        // e -> sombreamento Cartoon
+        // r -> ativar e desativar o cálculo da iluminação
+
+        // p -> ativar/desativar luzes pontuais
+        // s -> ativar/desativar luz spotlight
+        // d -> ativar/desativar luz global (lua cheia)
     }
 }
 

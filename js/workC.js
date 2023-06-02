@@ -8,10 +8,31 @@ var geometry, mesh;
 
 var moon, ovni, house;
 
+// lights
+var globalLight = new THREE.DirectionalLight(0xFFFFFF, 0.5);
+var ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+var spotLight = new THREE.SpotLight(0xFFFFFF, 0.5);
+
+var pointLight1 = new THREE.PointLight(0xFFFFFF, 0.5);
+var pointLight2 = new THREE.PointLight(0xFFFFFF, 0.5);
+var pointLight3 = new THREE.PointLight(0xFFFFFF, 0.5);
+var pointLight4 = new THREE.PointLight(0xFFFFFF, 0.5);
+var pointLight5 = new THREE.PointLight(0xFFFFFF, 0.5);
+var pointLight6 = new THREE.PointLight(0xFFFFFF, 0.5);
+var pointLight7 = new THREE.PointLight(0xFFFFFF, 0.5);
+var pointLight8 = new THREE.PointLight(0xFFFFFF, 0.5);
+
+// materials
 const materials = new Map(), clock = new THREE.Clock();
 var delta;
 
 const keys = {}, movementVector = new THREE.Vector2(0, 0);
+
+// shade
+let shadeCalculation = false;
+let isPhong = false;
+let isGouraud = false;
+let isToon = false;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -26,6 +47,55 @@ function createScene(){
     createMoon(0, 50, 0);
     createOVNI(5, 7.5, 0);
     createHouse(0, 0, 0);
+
+    //global light
+    scene.add(globalLight);
+    globalLight.position.set(100, 250, 100 );
+    globalLight.target.position.set(0, -175, 0);
+    globalLight.visible = true;
+
+    //ambient light
+    scene.add(ambientLight);
+    ambientLight.visible = true;
+
+    //spotlight
+    scene.add(spotLight);
+    spotLight.visible = true;
+    spotLight.position.set(-200, -12, 100);
+    // spotLight.target = beam; n sei fazer isto ainda kakaka
+
+    //pontual lights
+    scene.add(pointLight1);
+    pointLight1.position.set(0, 0, 0);
+    pointLight1.visible = true;
+
+    scene.add(pointLight2);
+    pointLight2.position.set(0, 0, 0);
+    pointLight2.visible = true;
+
+    scene.add(pointLight3);
+    pointLight3.position.set(0, 0, 0);
+    pointLight3.visible = true;
+
+    scene.add(pointLight4);
+    pointLight4.position.set(0, 0, 0);
+    pointLight4.visible = true;
+
+    scene.add(pointLight5);
+    pointLight5.position.set(0, 0, 0);
+    pointLight5.visible = true;
+
+    scene.add(pointLight6);
+    pointLight6.position.set(0, 0, 0);
+    pointLight6.visible = true;
+
+    scene.add(pointLight7);
+    pointLight7.position.set(0, 0, 0);
+    pointLight7.visible = true;
+
+    scene.add(pointLight8);
+    pointLight8.position.set(0, 0, 0);
+    pointLight8.visible = true;
 }
 
 //////////////////////
@@ -213,6 +283,51 @@ function createHouse(x, y, z) {
     scene.add(house);
 }
 
+///////////////////////
+/*      LIGHTS       */
+///////////////////////
+
+
+function updateLights() {
+    'use strict';
+    pointLight1 = !pointLight1;
+    pointLight2 = !pointLight2;
+    pointLight3 = !pointLight3;
+    pointLight4 = !pointLight4;
+    pointLight5 = !pointLight5;
+    pointLight6 = !pointLight6;
+    pointLight7 = !pointLight7;
+    pointLight8 = !pointLight8;
+}
+
+///////////////////////
+/* SHADE CALCULATION */
+///////////////////////
+function updateShadeCalculation(){
+    'use strict';
+    if (shadeCalculation) {
+
+    } else {
+
+    }
+    shadeCalculation = !shadeCalculation;
+}
+
+function changeGouraud() {
+    'use strict';
+    isGouraud = !isGouraud;
+}
+
+function changePhong() {
+    'use strict';
+    isPhong = !isPhong;
+}
+
+function changeToon() {
+    'use strict';
+    isToon = !isToon;
+}
+
 //////////////////////
 /* CHECK COLLISIONS */
 //////////////////////
@@ -254,7 +369,7 @@ function update(delta) {
 
     ovni.position.x += movementVector.x * delta;
     ovni.position.z += movementVector.y * delta;
-
+    
     //house.rotation.y += Math.PI / 8;
 }
 
@@ -276,7 +391,11 @@ function init() {
         antialias: true
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.xr.enabled = true;
+
     document.body.appendChild(renderer.domElement);
+    document.body.appendChild(VRButton.createButton(renderer));
 
     createMaterials();
     createScene();
@@ -353,6 +472,26 @@ function onKeyDown(e) {
         // p -> ativar/desativar luzes pontuais
         // s -> ativar/desativar luz spotlight
         // d -> ativar/desativar luz global (lua cheia)
+        case 80: // p -> luzes pontuais
+            updateLights();
+        case 82: // r -> cálculo da iluminação
+            updateShadeCalculation();
+            break;
+        case 83: // s -> luz spotlight
+            spotLight.visible = !spotLight.visible;
+            break;
+        case 68: // d -> luz global
+            globalLight.visible = !globalLight.visible;
+            break;
+        case 81: // q -> sombreamento Gouraud
+            changeGouraud();
+            break;
+        case 87: // w -> sombreamento Phong
+            changePhong();
+            break;
+        case 69: // e -> sombreamento Cartoon
+            changeToon();
+            break;
     }
 }
 

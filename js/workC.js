@@ -8,7 +8,10 @@ var geometry, mesh;
 
 var moon, ovni;
 
-const materials = new Map();
+const materials = new Map(), clock = new THREE.Clock();
+var delta;
+
+const keys = {}, movementVector = new THREE.Vector2(0, 0);
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -173,9 +176,28 @@ function handleCollisions(){
 ////////////
 /* UPDATE */
 ////////////
-function update(){
+function update(delta) {
     'use strict';
 
+    ovni.rotation.y += 0.01;
+
+    movementVector.set(0, 0);
+
+    if (keys['ArrowUp']) {
+        movementVector.x -= 100;
+    }
+    if (keys['ArrowDown']) {
+        movementVector.x += 100;
+    }
+    if (keys['ArrowLeft']) {
+        movementVector.y += 100;
+    }
+    if (keys['ArrowRight']) {
+        movementVector.y -= 100;
+    }
+
+    ovni.position.x += movementVector.x * delta;
+    ovni.position.z += movementVector.y * delta;
 }
 
 /////////////
@@ -213,7 +235,9 @@ function init() {
 function animate() {
     'use strict';
 
-    update();
+    delta = clock.getDelta();
+
+    update(delta);
     render();
     requestAnimationFrame(animate);
 }
@@ -254,6 +278,12 @@ function onKeyDown(e) {
         case 53: // 5
             camera = cameras[4];
             break;
+        case 37: // arrow
+        case 38: // arrow
+        case 39: // arrow
+        case 40: // arrow
+            keys[e.code] = true;
+            break;
     }
 }
 
@@ -263,4 +293,5 @@ function onKeyDown(e) {
 function onKeyUp(e){
     'use strict';
 
+    keys[e.code] = false;
 }

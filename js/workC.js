@@ -9,9 +9,11 @@ var geometry, mesh;
 var moon, ovni, house;
 
 // lights
-var globalLight = new THREE.DirectionalLight(0xFFFFFF, 0.5);
+var globalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
 var ambientLight = new THREE.AmbientLight(0x404040, 0.3);
-var spotLight = new THREE.SpotLight(0xFFFFFF, 0.5);
+var spotLight = new THREE.SpotLight(0xede0c2, 0.5, 7.5, Math.PI / 4.0, 0.5, 1);
+
+var whatMaterial = "basic";
 
 var pointLight1 = new THREE.PointLight(0xFFFFFF, 0.5);
 var pointLight2 = new THREE.PointLight(0xFFFFFF, 0.5);
@@ -30,9 +32,6 @@ const keys = {}, movementVector = new THREE.Vector2(0, 0);
 
 // shade
 let shadeCalculation = false;
-let isPhong = false;
-let isGouraud = false;
-let isToon = false;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -41,33 +40,36 @@ function createScene(){
     'use strict';
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color('#ffffff')
+    scene.background = new THREE.Color('#262626')
     scene.add(new THREE.AxesHelper(50));
 
-    createMoon(0, 50, 0);
+    createMoon(0, 40, 0);
     createOVNI(5, 7.5, 0);
     createHouse(0, 0, 0);
 
     //global light
+    globalLight.position.set(2, 10, 1);
+    globalLight.target.position.set(0, 0, 0);
+    //globalLight.visible = true;
     scene.add(globalLight);
-    globalLight.position.set(100, 250, 100 );
-    globalLight.target.position.set(0, -175, 0);
-    globalLight.visible = true;
 
     //ambient light
     scene.add(ambientLight);
-    ambientLight.visible = true;
+    //ambientLight.visible = true;
 
     //spotlight
+    //createSpotLight(5, 7.05, 0);
+    //spotLight.visible = true;
+    spotLight.position.set(0, -25, 0);
+    spotLight.target.position.set = ovni.position;
     scene.add(spotLight);
-    spotLight.visible = true;
-    spotLight.position.set(-200, -12, 100);
-    // spotLight.target = beam; n sei fazer isto ainda kakaka
+    scene.add(spotLight.target);    
+    // spotLight.castShadow = true;
 
     //pontual lights
-    scene.add(pointLight1);
-    pointLight1.position.set(0, 0, 0);
+    pointLight1.position.set(0, 5, 0);
     pointLight1.visible = true;
+    scene.add(pointLight1);
 
     scene.add(pointLight2);
     pointLight2.position.set(0, 0, 0);
@@ -145,11 +147,71 @@ function createCameras() {
 
 function createMaterials() {
     'use strict';
-    materials.set("moon", new THREE.MeshBasicMaterial({ color: 0xfcba03, wireframe: false }));
-    materials.set("ovni", new THREE.MeshBasicMaterial({ color: 0x707070, wireframe: false }));
-    materials.set("cockpit", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false }));
-    materials.set("beam", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false }));
-    materials.set("light", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false }));
+
+    materials.set("moon", null);
+    materials.set("ovni", null);
+    materials.set("cockpit", null);
+    materials.set("beam", null);
+    materials.set("light", null);
+
+    //basic
+    materials.set("moon basic material", new THREE.MeshBasicMaterial({ color: 0xfcba03, wireframe: false, side: THREE.DoubleSide}));
+    // , emissive: 0xfcf74c, emissiveIntensity: 0.5
+    materials.set("ovni basic material", new THREE.MeshBasicMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("cockpit basic material", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("beam basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("light basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+
+    //lambert
+    materials.set("moon lambert material", new THREE.MeshLambertMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcf74c, emissiveIntensity: 0.5, side: THREE.DoubleSide}));
+    materials.set("ovni lambert material", new THREE.MeshLambertMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("cockpit lambert material", new THREE.MeshLambertMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("beam lambert material", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("light lambert material", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+
+    //phong
+    materials.set("moon phong material", new THREE.MeshPhongMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcf74c, emissiveIntensity: 0.5, side: THREE.DoubleSide }));
+    materials.set("ovni phong material", new THREE.MeshPhongMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("cockpit phong material", new THREE.MeshPhongMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("beam phong material", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("light phong material", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+
+    //toon
+    materials.set("moon toon material", new THREE.MeshToonMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcf74c, emissiveIntensity: 0.5, side: THREE.DoubleSide }));
+    materials.set("ovni toon material", new THREE.MeshToonMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("cockpit toon material", new THREE.MeshToonMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("beam toon material", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("light toon material", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+}
+
+function updateMaterials() {
+    'use strict';
+
+    if (whatMaterial == "lambert") {
+        materials.set("moon", materials.get("moon lambert material"));
+        materials.set("ovni", materials.get("ovni lambert material"));
+        materials.set("cockpit", materials.get("cockpit lambert material"));
+        materials.set("beam", materials.get("beam lambert material"));
+        materials.set("light", materials.get("light lambert material"));
+    } else if (whatMaterial == "phong") {
+        materials.set("moon", materials.get("moon phong material"));
+        materials.set("ovni", materials.get("ovni phong material"));
+        materials.set("cockpit", materials.get("cockpit phong material"));
+        materials.set("beam", materials.get("beam phong material"));
+        materials.set("light", materials.get("light phong material"));
+    } else if (whatMaterial == "toon") {
+        materials.set("moon", materials.get("moon toon material"));
+        materials.set("ovni", materials.get("ovni toon material"));
+        materials.set("cockpit", materials.get("cockpit toon material"));
+        materials.set("beam", materials.get("beam toon material"));
+        materials.set("light", materials.get("light toon material"));
+    } else {
+        materials.set("moon", materials.get("moon basic material"));
+        materials.set("ovni", materials.get("ovni basic material"));
+        materials.set("cockpit", materials.get("cockpit basic material"));
+        materials.set("beam", materials.get("beam basic material"));
+        materials.set("light", materials.get("light basic material"));
+    }
 }
 
 function setVertices(xi, yi, zi, xf, yf, zf) {
@@ -287,18 +349,33 @@ function createHouse(x, y, z) {
 /*      LIGHTS       */
 ///////////////////////
 
+/*
+function createSpotLight(x, y, z) {
+    'use strict';
+
+    var light = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, 1.25, 150), new THREE.MeshBasicMaterial({ color: 0x5d4a80}));
+
+    light.position.set(x, y + 0.2, z);
+    scene.add(light);
+
+    var view = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 3, 7.5, 150), new THREE.MeshBasicMaterial({ color: 0x5d4a80}));
+    view.position.set(0, -4, 0);
+
+    light.add(view);
+}
 
 function updateLights() {
     'use strict';
-    pointLight1 = !pointLight1;
-    pointLight2 = !pointLight2;
-    pointLight3 = !pointLight3;
-    pointLight4 = !pointLight4;
-    pointLight5 = !pointLight5;
-    pointLight6 = !pointLight6;
-    pointLight7 = !pointLight7;
-    pointLight8 = !pointLight8;
+    pointLight1.visible = !pointLight1.visible;
+    pointLight2.visible = !pointLight2.visible;
+    pointLight3.visible = !pointLight3.visible;
+    pointLight4.visible = !pointLight4.visible;
+    pointLight5.visible = !pointLight5.visible;
+    pointLight6.visible = !pointLight6.visible;
+    pointLight7.visible = !pointLight7.visible;
+    pointLight8.visible = !pointLight8.visible;
 }
+*/
 
 ///////////////////////
 /* SHADE CALCULATION */
@@ -311,21 +388,6 @@ function updateShadeCalculation(){
 
     }
     shadeCalculation = !shadeCalculation;
-}
-
-function changeGouraud() {
-    'use strict';
-    isGouraud = !isGouraud;
-}
-
-function changePhong() {
-    'use strict';
-    isPhong = !isPhong;
-}
-
-function changeToon() {
-    'use strict';
-    isToon = !isToon;
 }
 
 //////////////////////
@@ -349,7 +411,8 @@ function handleCollisions(){
 ////////////
 function update(delta) {
     'use strict';
-
+    
+    updateMaterials();
     ovni.rotation.y += 0.01;
 
     movementVector.set(0, 0);
@@ -398,6 +461,7 @@ function init() {
     document.body.appendChild(VRButton.createButton(renderer));
 
     createMaterials();
+    updateMaterials();
     createScene();
     createCameras();
 
@@ -464,33 +528,36 @@ function onKeyDown(e) {
         case 40: // arrow
             keys[e.code] = true;
             break;
-        // q -> sombreamento Gouraud
-        // w -> sombreamento Phong
-        // e -> sombreamento Cartoon
-        // r -> ativar e desativar o cálculo da iluminação
-
-        // p -> ativar/desativar luzes pontuais
-        // s -> ativar/desativar luz spotlight
-        // d -> ativar/desativar luz global (lua cheia)
         case 80: // p -> luzes pontuais
             updateLights();
+            console.log("update point lights");
+            break;
         case 82: // r -> cálculo da iluminação
             updateShadeCalculation();
+            console.log("update shade calculation");
             break;
         case 83: // s -> luz spotlight
             spotLight.visible = !spotLight.visible;
+            console.log("spotlight is visible: " + spotLight.visible);
             break;
         case 68: // d -> luz global
             globalLight.visible = !globalLight.visible;
+            console.log("global light is visible: " + globalLight.visible);
             break;
         case 81: // q -> sombreamento Gouraud
-            changeGouraud();
+            whatMaterial = "gourard";
+            updateMaterials();
+            console.log("material: " + whatMaterial);
             break;
         case 87: // w -> sombreamento Phong
-            changePhong();
+            whatMaterial = "phong";
+            updateMaterials();
+            console.log("material: " + whatMaterial);
             break;
         case 69: // e -> sombreamento Cartoon
-            changeToon();
+            whatMaterial = "toon";
+            updateMaterials();
+            console.log("material: " + whatMaterial);
             break;
     }
 }

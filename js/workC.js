@@ -6,7 +6,7 @@ var cameras = [], camera, scene, renderer;
 
 var geometry, mesh;
 
-var moon, ovni, house;
+var moon, ovni, house, tree;
 
 // lights
 var globalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
@@ -46,6 +46,9 @@ function createScene(){
     createMoon(0, 40, 0);
     createOVNI(5, 7.5, 0);
     createHouse(0, 0, 0);
+    createTree();
+    createTree();
+    createTree();
 
     //global light
     globalLight.position.set(2, 10, 1);
@@ -176,6 +179,9 @@ function createMaterials() {
     materials.set("side ceiling 1 basic material", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false, side: THREE.FrontSide }));
     materials.set("side ceiling 2 basic material", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false, side: THREE.BackSide }));
 
+    materials.set("tree trunk basic material", new THREE.MeshBasicMaterial({ color: 0xa45729, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("tree foliage basic material", new THREE.MeshBasicMaterial({ color: 0x013220, wireframe: false, side: THREE.DoubleSide }));
+
     //lambert
     materials.set("moon lambert material", new THREE.MeshLambertMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcf74c, emissiveIntensity: 0.5, side: THREE.DoubleSide}));
     materials.set("ovni lambert material", new THREE.MeshLambertMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
@@ -228,6 +234,66 @@ function updateMaterials() {
         materials.set("beam", materials.get("beam basic material"));
         materials.set("light", materials.get("light basic material"));
     }
+}
+
+function createTree() {
+    'use strict';
+
+    tree = new THREE.Object3D();
+
+    //trunk
+    geometry = new THREE.CylinderGeometry(1, 1, 5, 25);
+    mesh = new THREE.Mesh(geometry, materials.get("tree trunk basic material"));
+    tree.add(mesh);
+
+    //branch
+    geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 50);
+    mesh = new THREE.Mesh(geometry, materials.get("tree trunk basic material"));
+    mesh.rotation.z = Math.PI/4; 
+    mesh.position.set(-1, 1.5, 0);
+    tree.add(mesh);
+
+    //branch
+    geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 50);
+    mesh = new THREE.Mesh(geometry, materials.get("tree trunk basic material"));
+    mesh.rotation.z = -Math.PI/4; 
+    mesh.position.set(1, 2.5, 0);
+    tree.add(mesh);
+
+    //branch
+    geometry = new THREE.CylinderGeometry(0.25, 0.25, 2, 50);
+    mesh = new THREE.Mesh(geometry, materials.get("tree trunk basic material"));
+    mesh.rotation.z = Math.PI/4; 
+    mesh.position.set(0.5, 4, 0);
+    tree.add(mesh);
+
+    //foliage
+    geometry = new THREE.SphereGeometry(1.5, 32, 16);
+    geometry.rotateZ(Math.PI/2);
+    geometry.scale(2, 1, 1);
+    mesh = new THREE.Mesh(geometry, materials.get("tree foliage basic material"));
+    mesh.position.set(-4, 3, 0);
+    tree.add(mesh);
+
+    //foliage
+    geometry = new THREE.SphereGeometry(1.5, 32, 16);
+    geometry.rotateZ(Math.PI/2);
+    geometry.scale(2, 1, 1);
+    mesh = new THREE.Mesh(geometry, materials.get("tree foliage basic material"));
+    mesh.position.set(1, 5, 0);
+    tree.add(mesh);
+
+    scene.add(tree);
+
+    var spawnArea = new THREE.Box3(
+        new THREE.Vector3(-25, 0, -25), // Min coordinates of the spawn area
+        new THREE.Vector3(25, 0, 25)    // Max coordinates of the spawn area
+      );
+
+    tree.position.set(
+        THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x),
+        2.5,
+        THREE.MathUtils.randFloat(spawnArea.min.z, spawnArea.max.z));
 }
 
 function createMoon(x, y, z) {

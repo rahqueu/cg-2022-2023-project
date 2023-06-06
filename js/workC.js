@@ -8,6 +8,8 @@ var geometry, mesh;
 
 var moon, ovni, house, tree;
 
+var treePos = [];
+
 // lights
 var globalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
 var ambientLight = new THREE.AmbientLight(0x404040, 0.3);
@@ -271,17 +273,47 @@ function createTree() {
     mesh.position.set(1, 5, 0);
     tree.add(mesh);
 
-    scene.add(tree);
-
     var spawnArea = new THREE.Box3(
         new THREE.Vector3(-25, 0, -25), // Min coordinates of the spawn area
         new THREE.Vector3(25, 0, 25)    // Max coordinates of the spawn area
       );
+    
+    const housePos = new THREE.Vector3(house.position.x - 4, 0, house.position.z - 7);
+    var houseSize = new THREE.Vector3(16, 11, 28);
 
-    tree.position.set(
-        THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x),
-        2.5,
-        THREE.MathUtils.randFloat(spawnArea.min.z, spawnArea.max.z));
+    for (var i = 0; i < 3; i++) {
+        var isColliding = true;
+        var randomPos;
+
+        while (isColliding) {
+            randomPos = new THREE.Vector3(
+                THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x),
+                2.5,
+                THREE.MathUtils.randFloat(spawnArea.min.z, spawnArea.max.z)
+            )
+
+            // check collision with other trees
+            var isCollidingWithTrees = false;
+            for (var j = 0; j < treePos.length; j++) {
+                if (randomPos.distanceTo(treePos[j]) < 10) {
+                    isCollidingWithTrees = true;
+                    break;
+                }
+            }
+
+            // check collision with house
+            if (randomPos.distanceTo(housePos) > houseSize.x && 
+                randomPos.distanceTo(housePos) > houseSize.z &&
+                !isCollidingWithTrees) {
+                isColliding = false;
+            }
+        }
+        tree.position.copy(randomPos);
+        tree.rotation.y = THREE.MathUtils.randFloat(0, Math.PI);
+        scene.add(tree);
+
+        treePos.push(randomPos);
+    }
 }
 
 function createMoon(x, y, z) {

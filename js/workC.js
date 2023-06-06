@@ -109,8 +109,8 @@ function createScene(){
 function createCameras() {
     'use strict';
     const positions = new Array(new Array(-50, 0, 0), // frontal
-                                new Array(0, 0, 50), // lateral
-                                new Array(0, -15, 0), // baixo
+                                new Array(0, 0, -50), // lateral
+                                new Array(0, 50, 0), // baixo
                                 new Array(15, 10, 15), // perspetiva isométrica - projeção ortogonal
                                 new Array(50, 50, 50), // perspetiva isométrica - projeção perspetiva
                                 new Array(-50, 50, -50)); // perspetiva isométrica - projeção perspetiva
@@ -132,12 +132,6 @@ function createCameras() {
         cameras.push(camera);
     }
     camera = cameras[5];
-    /*
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-
-    camera.position.set(25, 25, 25);
-    camera.lookAt(scene.position);
-    */
 }
 
 /////////////////////
@@ -168,16 +162,10 @@ function createMaterials() {
     materials.set("cockpit basic material", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
     materials.set("beam basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
     materials.set("light basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("front wall basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.FrontSide }));
-    materials.set("back wall basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.BackSide }));
-    materials.set("side wall 1 basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.BackSide }));
-    materials.set("side wall 2 basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.FrontSide }));
-    materials.set("front window basic material", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false, side: THREE.FrontSide }));
-    materials.set("side window basic material", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false, side: THREE.BackSide }));
-    materials.set("front ceiling basic material", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false, side: THREE.FrontSide }));
-    materials.set("back ceiling basic material", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false, side: THREE.FrontSide }));
-    materials.set("side ceiling 1 basic material", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false, side: THREE.FrontSide }));
-    materials.set("side ceiling 2 basic material", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false, side: THREE.BackSide }));
+
+    materials.set("wall basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false }));
+    materials.set("window basic material", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false }));
+    materials.set("ceiling basic material", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false }));
 
     materials.set("tree trunk basic material", new THREE.MeshBasicMaterial({ color: 0xa45729, wireframe: false, side: THREE.DoubleSide }));
     materials.set("tree foliage basic material", new THREE.MeshBasicMaterial({ color: 0x013220, wireframe: false, side: THREE.DoubleSide }));
@@ -359,416 +347,387 @@ function createOVNI(x, y, z) {
     scene.add(ovni);
 }
 
-// TODO: rework house modeling functions
-
-function createFrontWindow(vertices, x, y, z) {
+function createWalls(x, y, z) {
     'use strict';
 
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
-    ]);
+    // SIDE WALL
+    var wall = new THREE.Group();
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var window = new THREE.Mesh(geometry, materials.get("front window basic material"));
-    window.position.set(x, y, z);
-
-    house.add(window);
-}
-
-function createSideWindow(vertices, x, y, z) {
-    'use strict';
-
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
-    ]);
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var window = new THREE.Mesh(geometry, materials.get("side window basic material"));
-    window.position.set(x, y, z);
-
-    house.add(window);
-}
-
-function createFrontCeiling(vertices, x, y, z) {
-    'use strict';
-
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
-    ]);
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var wall = new THREE.Mesh(geometry, materials.get("front ceiling basic material"));
-    wall.position.set(x, y, z);
-
-    house.add(wall);
-}
-
-function createBackCeiling(vertices, x, y, z) {
-    'use strict';
-
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
-    ]);
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var wall = new THREE.Mesh(geometry, materials.get("back ceiling basic material"));
-    wall.position.set(x, y, z);
-
-    house.add(wall);
-}
-
-function createSideCeilingOne(vertices, x, y, z) {
-    'use strict';
-
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-    ]);
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var wall = new THREE.Mesh(geometry, materials.get("side ceiling 1 basic material"));
-    wall.position.set(x, y, z);
-
-    house.add(wall);
-}
-
-function createSideCeilingTwo(vertices, x, y, z) {
-    'use strict';
-
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-    ]);
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var wall = new THREE.Mesh(geometry, materials.get("side ceiling 2 basic material"));
-    wall.position.set(x, y, z);
-
-    house.add(wall);
-}
-
-function createFrontWallComponent(vertices, x, y, z) {
-    'use strict';
-
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
-    ]);
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var wall = new THREE.Mesh(geometry, materials.get("front wall basic material"));
-    wall.position.set(x, y, z);
-
-    house.add(wall);
-}
-
-function createBackWallComponent(vertices, x, y, z) {
-    'use strict';
-
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
-    ]);
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var wall = new THREE.Mesh(geometry, materials.get("back wall basic material"));
-    wall.position.set(x, y, z);
-
-    house.add(wall);
-}
-
-function createSideWallOneComponent(vertices, x, y, z) {
-    'use strict';
-
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
-    ]);
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var wall = new THREE.Mesh(geometry, materials.get("side wall 1 basic material"));
-    wall.position.set(x, y, z);
-
-    house.add(wall);
-}
-
-function createSideWallTwoComponent(vertices, x, y, z) {
-    'use strict';
-
-    geometry = new THREE.BufferGeometry();
-    var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
-    ]);
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-    var wall = new THREE.Mesh(geometry, materials.get("side wall 2 basic material"));
-    wall.position.set(x, y, z);
-
-    house.add(wall);
-}
-
-function createWallOne(x, y, z) {
-    'use strict';
-
-    var v = new Float32Array([
+    var vertices = new Float32Array([
         0, 0, 0,  // 0
         3, 0, 0,  // 1
         3, 7, 0,  // 2
         0, 7, 0   // 3
     ]);
-    createSideWallOneComponent(v, x, y, z);
+    
+    var indices = new Uint32Array([
+        0, 2, 1,
+        0, 3, 2
+    ]);
 
-    v = new Float32Array([
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+
+    vertices = new Float32Array([
         3, 0, 0,  // 0
         5, 0, 0,  // 1
         5, 3, 0,  // 2
         0, 3, 0   // 3
     ]);
-    createSideWallOneComponent(v, x, y, z);
 
-    v = new Float32Array([
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+
+    vertices = new Float32Array([
         3, 5, 0,  // 0
         5, 5, 0,  // 1
         5, 7, 0,  // 2
         0, 7, 0   // 3
     ]);
-    createSideWallOneComponent(v, x, y, z);
 
-    v = new Float32Array([
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+
+    vertices = new Float32Array([
         5, 0, 0,  // 0
         8, 0, 0,  // 1
         8, 7, 0,  // 2
         5, 7, 0   // 3
     ]);
-    createSideWallOneComponent(v, x, y, z);
 
-    v = new Float32Array([
-        3, 3, 0,  // 0
-        5, 3, 0,  // 1
-        5, 5, 0,  // 2
-        3, 5, 0   // 3
-    ]);
-    createSideWindow(v, x, y, z);
-}
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+    
+    wall.position.set(x, y, z);
+    house.add(wall);
 
-function createWallTwo(x, y, z) {
-    'use strict';
+    // SIDE WALL
+    var wall = new THREE.Group();
 
-    var v = new Float32Array([
+    vertices = new Float32Array([
         0, 0, 14,  // 0
         8, 0, 14,  // 1
         8, 7, 14,  // 2
         0, 7, 14   // 3
     ]);
-    createSideWallTwoComponent(v, x, y, z);
 
-    /*
-    var v = new Float32Array([
-        0, 0, 14,  // 0
-        3, 0, 14,  // 1
-        3, 7, 14,  // 2
-        0, 7, 14   // 3
+    var indices = new Uint32Array([
+        0, 1, 2,
+        0, 2, 3
     ]);
-    createSideWallTwoComponent(v, x, y, z);
 
-    v = new Float32Array([
-        3, 0, 14,  // 0
-        5, 0, 14,  // 1
-        5, 3, 14,  // 2
-        0, 3, 14   // 3
-    ]);
-    createSideWallTwoComponent(v, x, y, z);
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+    
+    wall.position.set(x, y, z);
+    house.add(wall);
 
-    v = new Float32Array([
-        3, 5, 14,  // 0
-        5, 5, 14,  // 1
-        5, 7, 14,  // 2
-        0, 7, 14   // 3
-    ]);
-    createSideWallTwoComponent(v, x, y, z);
+    // FRONT WALL
+    var wall = new THREE.Group();
 
-    v = new Float32Array([
-        5, 0, 14,  // 0
-        8, 0, 14,  // 1
-        8, 7, 14,  // 2
-        5, 7, 14   // 3
-    ]);
-    createSideWallTwoComponent(v, x, y, z);
-
-    v = new Float32Array([
-        3, 3, 14,  // 0
-        5, 3, 14,  // 1
-        5, 5, 14,  // 2
-        3, 5, 14   // 3
-    ]);
-    createWindow(v, x, y, z);
-    */
-}
-
-function createWallThree(x, y, z) {
-    'use strict';
-
-    var v = new Float32Array([
+    vertices = new Float32Array([
         0, 0, 0,  // 0
         0, 0, 2,  // 1
         0, 4, 2,  // 2
         0, 4, 0   // 3
     ]);
-    createFrontWallComponent(v, x, y, z);
 
-    var v = new Float32Array([
+    var indices = new Uint32Array([
+        0, 1, 2,
+        0, 2, 3
+    ]);
+    
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+
+    vertices = new Float32Array([
         0, 4, 0,  // 0
         0, 4, 14,  // 1
         0, 7, 14,  // 2
         0, 7, 0   // 3
     ]);
-    createFrontWallComponent(v, x, y, z);
+    
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
 
-    v = new Float32Array([
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+
+    vertices = new Float32Array([
         0, 0, 4,  // 0
         0, 0, 6,  // 1
         0, 4, 6,  // 2
         0, 4, 4   // 3
     ]);
-    createFrontWallComponent(v, x, y, z);
+    
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
 
-    v = new Float32Array([
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+
+    vertices = new Float32Array([
         0, 0, 6,  // 0
         0, 0, 8,  // 1
         0, 2, 8,  // 2
         0, 2, 6   // 3
     ]);
-    createFrontWallComponent(v, x, y, z);
+    
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
 
-    v = new Float32Array([
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+
+    vertices = new Float32Array([
         0, 0, 8,  // 0
         0, 0, 10,  // 1
         0, 4, 10,  // 2
         0, 4, 8   // 3
     ]);
-    createFrontWallComponent(v, x, y, z);
+    
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
 
-    v = new Float32Array([
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+
+    vertices = new Float32Array([
         0, 0, 10,  // 0
         0, 0, 12,  // 1
         0, 2, 12,  // 2
         0, 2, 10   // 3
     ]);
-    createFrontWallComponent(v, x, y, z);
+    
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
 
-    v = new Float32Array([
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+
+    vertices = new Float32Array([
         0, 0, 12,  // 0
         0, 0, 14,  // 1
         0, 4, 14,  // 2
         0, 4, 12   // 3
     ]);
-    createFrontWallComponent(v, x, y, z);
 
-    // DOOR
-    v = new Float32Array([
-        0, 0, 2,  // 0
-        0, 0, 4,  // 1
-        0, 4, 4,  // 2
-        0, 4, 2   // 3
-    ]);
-    createFrontWindow(v, x, y, z);
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+    
+    wall.position.set(x, y, z);
+    house.add(wall);
 
-    // WINDOWS
-    v = new Float32Array([
-        0, 2, 6,  // 0
-        0, 2, 8,  // 1
-        0, 4, 8,  // 2
-        0, 4, 6   // 3
-    ]);
-    createFrontWindow(v, x, y, z);
+    // BACK WALL
+    var wall = new THREE.Group();
 
-    v = new Float32Array([
-        0, 2, 10,  // 0
-        0, 2, 12,  // 1
-        0, 4, 12,  // 2
-        0, 4, 10   // 3
-    ]);
-    createFrontWindow(v, x, y, z);
-}
-
-function createWallFour(x, y, z) {
-    'use strict';
-
-    var v = new Float32Array([
+    vertices = new Float32Array([
         8, 0, 0,  // 0
         8, 0, 14,  // 1
         8, 7, 14,  // 2
         8, 7, 0   // 3
     ]);
-    createBackWallComponent(v, x, y, z);
+
+    var indices = new Uint32Array([
+        2, 1, 0,
+        3, 2, 0
+    ]);
+
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    wall.add(component);
+    
+    wall.position.set(x, y, z);
+    house.add(wall);
+}
+
+function createDoorAndWindows(x, y, z) {
+    'use strict';
+
+    // DOOR
+    var deco = new THREE.Group();
+
+    var vertices = new Float32Array([
+        0, 0, 2,  // 0
+        0, 0, 4,  // 1
+        0, 4, 4,  // 2
+        0, 4, 2   // 3
+    ]);
+
+    var indices = new Uint32Array([
+        0, 1, 2,
+        0, 2, 3
+    ]);
+
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("window basic material"));
+    deco.add(component);
+
+    // WINDOWS
+    vertices = new Float32Array([
+        0, 2, 6,  // 0
+        0, 2, 8,  // 1
+        0, 4, 8,  // 2
+        0, 4, 6   // 3
+    ]);
+
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("window basic material"));
+    deco.add(component);
+
+    vertices = new Float32Array([
+        0, 2, 10,  // 0
+        0, 2, 12,  // 1
+        0, 4, 12,  // 2
+        0, 4, 10   // 3
+    ]);
+
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("window basic material"));
+    deco.add(component);
+
+    vertices = new Float32Array([
+        3, 3, 0,  // 0
+        5, 3, 0,  // 1
+        5, 5, 0,  // 2
+        3, 5, 0   // 3
+    ]);
+
+    indices = new Uint32Array([
+        0, 2, 1,
+        0, 3, 2
+    ]);
+
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("window basic material"));
+    deco.add(component);
+
+    deco.position.set(x, y, z);
+    house.add(deco);
 }
 
 function createCeiling(x, y, z) {
     'use strict';
 
-    var v = new Float32Array([
+    var ceiling = new THREE.Group();
+
+    var vertices = new Float32Array([
         0, 7, 0,  // 0
         0, 7, 14,  // 1
         4, 11, 14,  // 2
         4, 11, 0   // 3
     ]);
-    createFrontCeiling(v, x, y, z);
 
-    v = new Float32Array([
+    var indices = new Uint32Array([
+        0, 1, 2,
+        0, 2, 3
+    ]);
+
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
+    ceiling.add(component);
+
+    vertices = new Float32Array([
         4, 11, 0,  // 0
         4, 11, 14,  // 1
         8, 7, 14,  // 2
         8, 7, 0   // 3
     ]);
-    createBackCeiling(v, x, y, z);
 
-    v = new Float32Array([
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
+    ceiling.add(component);
+
+    vertices = new Float32Array([
         0, 7, 0,  // 0
         4, 11, 0,  // 1
         8, 7, 0  // 2
     ]);
-    createSideCeilingOne(v, x, y, z);
 
-    v = new Float32Array([
+    indices = new Uint32Array([
+        0, 1, 2,
+    ]);
+
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
+    ceiling.add(component);
+
+    vertices = new Float32Array([
         0, 7, 14,  // 0
         4, 11, 14,  // 1
         8, 7, 14  // 2
     ]);
-    createSideCeilingTwo(v, x, y, z);
 
+    indices = new Uint32Array([
+        0, 2, 1,
+    ]);
 
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    g.setIndex(new THREE.BufferAttribute(indices, 1));
+    
+    var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
+    ceiling.add(component);
+
+    ceiling.position.set(x, y, z);
+    house.add(ceiling);
 }
 
 function createHouse(x, y, z) {
@@ -776,17 +735,9 @@ function createHouse(x, y, z) {
 
     house = new THREE.Object3D();
 
-    // SIDE WALL 1
-    createWallOne(x, y, z); // just be to clean, put all code here in the future
+    createWalls(x, y, z);
 
-    // SIDE WALL 2
-    createWallTwo(x, y, z);
-
-    // FRONT WALL
-    createWallThree(x, y, z);
-
-    // BACK WALL
-    createWallFour(x, y, z);
+    createDoorAndWindows(x, y, z);
 
     createCeiling(x, y, z);
 

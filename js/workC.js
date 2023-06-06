@@ -11,29 +11,22 @@ var moon, ovni, house, tree;
 var treePos = [];
 
 // lights
-var globalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
 var ambientLight = new THREE.AmbientLight(0x404040, 0.3);
-var spotLight = new THREE.SpotLight(0xede0c2, 0.5, 7.5, Math.PI / 4.0, 0.5, 1);
+var globalLight = new THREE.DirectionalLight(0xFFEA00, 0.8);
+ // 0.5, 7.5, Math.PI / 4.0, 0.5, 1);
 
-var whatMaterial = "basic";
+var whatMaterial = "lambert";
 
-var pointLight1 = new THREE.PointLight(0xFFFFFF, 0.5);
-var pointLight2 = new THREE.PointLight(0xFFFFFF, 0.5);
-var pointLight3 = new THREE.PointLight(0xFFFFFF, 0.5);
-var pointLight4 = new THREE.PointLight(0xFFFFFF, 0.5);
-var pointLight5 = new THREE.PointLight(0xFFFFFF, 0.5);
-var pointLight6 = new THREE.PointLight(0xFFFFFF, 0.5);
-var pointLight7 = new THREE.PointLight(0xFFFFFF, 0.5);
-var pointLight8 = new THREE.PointLight(0xFFFFFF, 0.5);
+
 
 // materials
-const materials = new Map(), clock = new THREE.Clock();
+const materials = new Map(), materialsLambert = new Map(), materialsPhong = new Map(), materialsToon = new Map(), materialsBasic = new Map(), clock = new THREE.Clock();
 var delta;
 
 const keys = {}, movementVector = new THREE.Vector2(0, 0);
 
 // shade
-let shadeCalculation = false;
+let shadeCalculation = true;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -46,63 +39,27 @@ function createScene(){
     scene.add(new THREE.AxesHelper(50));
 
     createMoon(0, 40, 0);
-    createOVNI(5, 7.5, 0);
+    createOVNI(5, 25, 0);
     createHouse(0, 0, 0);
     createTree();
     createTree();
     createTree();
 
-    //global light
-    globalLight.position.set(2, 10, 1);
-    globalLight.target.position.set(0, 0, 0);
-    //globalLight.visible = true;
+    //directional light
+    globalLight.position.set(moon.position.x, moon.position.y, moon.position.z);
+    globalLight.target.position.set(3, 0, 5);
+    globalLight.visible = true;
     scene.add(globalLight);
+    scene.add(globalLight.target);
 
     //ambient light
     scene.add(ambientLight);
-    //ambientLight.visible = true;
+    ambientLight.visible = true;    
 
-    //spotlight
-    //createSpotLight(5, 7.05, 0);
-    //spotLight.visible = true;
-    spotLight.position.set(0, -25, 0);
-    spotLight.target.position.set = ovni.position;
-    scene.add(spotLight);
-    scene.add(spotLight.target);    
-    // spotLight.castShadow = true;
-
-    //pontual lights
-    pointLight1.position.set(0, 5, 0);
-    pointLight1.visible = true;
-    scene.add(pointLight1);
-
-    scene.add(pointLight2);
-    pointLight2.position.set(0, 0, 0);
-    pointLight2.visible = true;
-
-    scene.add(pointLight3);
-    pointLight3.position.set(0, 0, 0);
-    pointLight3.visible = true;
-
-    scene.add(pointLight4);
-    pointLight4.position.set(0, 0, 0);
-    pointLight4.visible = true;
-
-    scene.add(pointLight5);
-    pointLight5.position.set(0, 0, 0);
-    pointLight5.visible = true;
-
-    scene.add(pointLight6);
-    pointLight6.position.set(0, 0, 0);
-    pointLight6.visible = true;
-
-    scene.add(pointLight7);
-    pointLight7.position.set(0, 0, 0);
-    pointLight7.visible = true;
-
-    scene.add(pointLight8);
-    pointLight8.position.set(0, 0, 0);
-    pointLight8.visible = true;
+    console.log(ovni.children.length);
+    console.log(house.children.length);
+    console.log(moon.children.length);
+    console.log(tree.children.length);
 }
 
 //////////////////////
@@ -148,81 +105,235 @@ function createMaterials() {
     'use strict';
 
     // TODO: update house materials
+    materials.set("moon", new THREE.MeshLambertMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcba03 }));
+    materials.set("ovni", new THREE.MeshLambertMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("cockpit", new THREE.MeshLambertMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("beam", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("light", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materials.set("wall", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }))
+    materials.set("window", new THREE.MeshLambertMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }))
+    materials.set("ceiling", new THREE.MeshLambertMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }))
+    materials.set("tree trunk", new THREE.MeshLambertMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }))
+    materials.set("tree foliage", new THREE.MeshLambertMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }))
 
-    materials.set("moon", null);
-    materials.set("ovni", null);
-    materials.set("cockpit", null);
-    materials.set("beam", null);
-    materials.set("light", null);
-    materials.set("wall", null);
-    materials.set("window", null);
+    createLambertMaterials();
+    createPhongMaterials();
+    createToonMaterials();
+    createBasicMaterials();
+}
 
-    //basic
-    materials.set("moon basic material", new THREE.MeshBasicMaterial({ color: 0xfcba03, wireframe: false, side: THREE.DoubleSide}));
-    // , emissive: 0xfcf74c, emissiveIntensity: 0.5
-    materials.set("ovni basic material", new THREE.MeshBasicMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("cockpit basic material", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("beam basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("light basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+function createToonMaterials() {
+    'use strict';
 
-    materials.set("wall basic material", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false }));
-    materials.set("window basic material", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false }));
-    materials.set("ceiling basic material", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false }));
+    materialsToon.set("moon", new THREE.MeshToonMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcba03, emissiveIntensity: 0.7 }));
+    materialsToon.set("ovni", new THREE.MeshToonMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
+    materialsToon.set("cockpit", new THREE.MeshToonMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
+    materialsToon.set("beam", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsToon.set("light", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsToon.set("wall", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsToon.set("window", new THREE.MeshToonMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }));
+    materialsToon.set("ceiling", new THREE.MeshToonMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }));
+    materialsToon.set("tree trunk", new THREE.MeshToonMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }));
+    materialsToon.set("tree foliage", new THREE.MeshToonMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }));
+}
 
-    materials.set("tree trunk basic material", new THREE.MeshBasicMaterial({ color: 0xa45729, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("tree foliage basic material", new THREE.MeshBasicMaterial({ color: 0x013220, wireframe: false, side: THREE.DoubleSide }));
+function createLambertMaterials() {
+    'use strict';
 
-    //lambert
-    materials.set("moon lambert material", new THREE.MeshLambertMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcf74c, emissiveIntensity: 0.5, side: THREE.DoubleSide}));
-    materials.set("ovni lambert material", new THREE.MeshLambertMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("cockpit lambert material", new THREE.MeshLambertMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("beam lambert material", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("light lambert material", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsLambert.set("moon", new THREE.MeshLambertMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcba03 }));
+    materialsLambert.set("ovni", new THREE.MeshLambertMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
+    materialsLambert.set("cockpit", new THREE.MeshLambertMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
+    materialsLambert.set("beam", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsLambert.set("light", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsLambert.set("wall", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }))
+    materialsLambert.set("window", new THREE.MeshLambertMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }))
+    materialsLambert.set("ceiling", new THREE.MeshLambertMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }))
+    materialsLambert.set("tree trunk", new THREE.MeshLambertMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }))
+    materialsLambert.set("tree foliage", new THREE.MeshLambertMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }))
+}
 
-    //phong
-    materials.set("moon phong material", new THREE.MeshPhongMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcf74c, emissiveIntensity: 0.5, side: THREE.DoubleSide }));
-    materials.set("ovni phong material", new THREE.MeshPhongMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("cockpit phong material", new THREE.MeshPhongMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("beam phong material", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("light phong material", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+function createPhongMaterials() {
+    'use strict';
 
-    //toon
-    materials.set("moon toon material", new THREE.MeshToonMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcf74c, emissiveIntensity: 0.5, side: THREE.DoubleSide }));
-    materials.set("ovni toon material", new THREE.MeshToonMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("cockpit toon material", new THREE.MeshToonMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("beam toon material", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("light toon material", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("moon", new THREE.MeshPhongMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcba03, specular: 0xede791, shininess: 100 }));
+    materialsPhong.set("ovni", new THREE.MeshPhongMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("cockpit", new THREE.MeshPhongMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("beam", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("light", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("wall", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("window", new THREE.MeshPhongMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("ceiling", new THREE.MeshPhongMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("tree trunk", new THREE.MeshPhongMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("tree foliage", new THREE.MeshPhongMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }));
+}
+
+function createBasicMaterials() {
+    'use strict';
+
+    materialsBasic.set("moon", new THREE.MeshBasicMaterial({ color: 0xfcba03, wireframe: false }));
+    materialsBasic.set("ovni", new THREE.MeshBasicMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
+    materialsBasic.set("cockpit", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
+    materialsBasic.set("beam", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsBasic.set("light", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsBasic.set("wall", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
+    materialsBasic.set("window", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }));
+    materialsBasic.set("ceiling", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }));
+    materialsBasic.set("tree trunk", new THREE.MeshBasicMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }));
+    materialsBasic.set("tree foliage", new THREE.MeshBasicMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }));
 }
 
 function updateMaterials() {
     'use strict';
-
+    
     // TODO: update house materials
 
     if (whatMaterial == "lambert") {
-        materials.set("moon", materials.get("moon lambert material"));
-        materials.set("ovni", materials.get("ovni lambert material"));
-        materials.set("cockpit", materials.get("cockpit lambert material"));
-        materials.set("beam", materials.get("beam lambert material"));
-        materials.set("light", materials.get("light lambert material"));
+        
+        moon.children.material = materialsLambert.get("moon");
+
+        ovni.children[0].material = materialsLambert.get("ovni");
+        ovni.children[1].material = materialsLambert.get("cockpit");
+        ovni.children[2].material = materialsLambert.get("beam");
+        for (let i = 3; i < 11; i++) {
+            ovni.children[i].material = materialsLambert.get("light");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            house.children[0].children[i].material = materialsLambert.get("wall");
+        }
+        house.children[1].children[0].material = materialsLambert.get("wall");
+        for (let i = 0; i < 7; i++) {
+            house.children[2].children[i].material = materialsLambert.get("wall");
+        }
+        house.children[3].children[0].material = materialsLambert.get("wall");
+
+        for (let i = 0; i < 4; i++) {
+            house.children[4].children[i].material = materialsLambert.get("window");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            house.children[5].children[i].material = materialsLambert.get("ceiling");
+        }
+
+        tree.children[0].material = materialsLambert.get("tree trunk");
+        tree.children[1].material = materialsLambert.get("tree trunk");
+        tree.children[2].material = materialsLambert.get("tree trunk");
+        tree.children[3].material = materialsLambert.get("tree trunk");
+        tree.children[4].material = materialsLambert.get("tree foliage");
+        tree.children[5].material = materialsLambert.get("tree foliage");
+
+        materialsLambert.shading = THREE.FlatShading;
+        materialsLambert.shading = THREE.SmoothShading;
+        // materials.needsUpdate = true;
+
     } else if (whatMaterial == "phong") {
-        materials.set("moon", materials.get("moon phong material"));
-        materials.set("ovni", materials.get("ovni phong material"));
-        materials.set("cockpit", materials.get("cockpit phong material"));
-        materials.set("beam", materials.get("beam phong material"));
-        materials.set("light", materials.get("light phong material"));
+        
+        moon.children.material = materialsPhong.get("moon");
+
+        ovni.children[0].material = materialsPhong.get("ovni");
+        ovni.children[1].material = materialsPhong.get("cockpit");
+        ovni.children[2].material = materialsPhong.get("beam");
+        for (let i = 3; i < 11; i++) {
+            ovni.children[i].material = materialsPhong.get("light");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            house.children[0].children[i].material = materialsPhong.get("wall");
+        }
+        house.children[1].children[0].material = materialsPhong.get("wall");
+        for (let i = 0; i < 7; i++) {
+            house.children[2].children[i].material = materialsPhong.get("wall");
+        }
+        house.children[3].children[0].material = materialsPhong.get("wall");
+
+        for (let i = 0; i < 4; i++) {
+            house.children[4].children[i].material = materialsPhong.get("window");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            house.children[5].children[i].material = materialsPhong.get("ceiling");
+        }
+
+        tree.children[0].material = materialsPhong.get("tree trunk");
+        tree.children[1].material = materialsPhong.get("tree trunk");
+        tree.children[2].material = materialsPhong.get("tree trunk");
+        tree.children[3].material = materialsPhong.get("tree trunk");
+        tree.children[4].material = materialsPhong.get("tree foliage");
+        tree.children[5].material = materialsPhong.get("tree foliage");
+
+        materialsPhong.shading = THREE.FlatShading;
+        materialsPhong.shading = THREE.SmoothShading;
+        materials.needsUpdate = true;
+
     } else if (whatMaterial == "toon") {
-        materials.set("moon", materials.get("moon toon material"));
-        materials.set("ovni", materials.get("ovni toon material"));
-        materials.set("cockpit", materials.get("cockpit toon material"));
-        materials.set("beam", materials.get("beam toon material"));
-        materials.set("light", materials.get("light toon material"));
-    } else {
-        materials.set("moon", materials.get("moon basic material"));
-        materials.set("ovni", materials.get("ovni basic material"));
-        materials.set("cockpit", materials.get("cockpit basic material"));
-        materials.set("beam", materials.get("beam basic material"));
-        materials.set("light", materials.get("light basic material"));
+        
+        moon.children.material = materialsToon.get("moon");
+
+        ovni.children[0].material = materialsToon.get("ovni");
+        ovni.children[1].material = materialsToon.get("cockpit");
+        ovni.children[2].material = materialsToon.get("beam");
+        for (let i = 3; i < 11; i++) {
+            ovni.children[i].material = materialsToon.get("light");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            house.children[0].children[i].material = materialsToon.get("wall");
+        }
+        house.children[1].children[0].material = materialsToon.get("wall");
+        for (let i = 0; i < 7; i++) {
+            house.children[2].children[i].material = materialsToon.get("wall");
+        }
+        house.children[3].children[0].material = materialsToon.get("wall");
+
+        for (let i = 0; i < 4; i++) {
+            house.children[4].children[i].material = materialsToon.get("window");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            house.children[5].children[i].material = materialsToon.get("ceiling");
+        }
+
+        tree.children[0].material = materialsToon.get("tree trunk");
+        tree.children[1].material = materialsToon.get("tree trunk");
+        tree.children[2].material = materialsToon.get("tree trunk");
+        tree.children[3].material = materialsToon.get("tree trunk");
+        tree.children[4].material = materialsToon.get("tree foliage");
+        tree.children[5].material = materialsToon.get("tree foliage");
+
+    } else if (whatMaterial == "basic") {
+
+        moon.children.material = materialsBasic.get("moon");
+
+        ovni.children[0].material = materialsBasic.get("ovni");
+        ovni.children[1].material = materialsBasic.get("cockpit");
+        ovni.children[2].material = materialsBasic.get("beam");
+        for (let i = 3; i < 11; i++) {
+            ovni.children[i].material = materialsBasic.get("light");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            house.children[0].children[i].material = materialsBasic.get("wall");
+        }
+        house.children[1].children[0].material = materialsBasic.get("wall");
+        for (let i = 0; i < 7; i++) {
+            house.children[2].children[i].material = materialsBasic.get("wall");
+        }
+        house.children[3].children[0].material = materialsBasic.get("wall");
+
+        for (let i = 0; i < 4; i++) {
+            house.children[4].children[i].material = materialsBasic.get("window");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            house.children[5].children[i].material = materialsBasic.get("ceiling");
+        }
+
+        tree.children[0].material = materialsBasic.get("tree trunk");
+        tree.children[1].material = materialsBasic.get("tree trunk");
+        tree.children[2].material = materialsBasic.get("tree trunk");
+        tree.children[3].material = materialsBasic.get("tree trunk");
+        tree.children[4].material = materialsBasic.get("tree foliage");
+        tree.children[5].material = materialsBasic.get("tree foliage");
     }
 }
 
@@ -233,26 +344,26 @@ function createTree() {
 
     //trunk
     geometry = new THREE.CylinderGeometry(1, 1, 5, 25);
-    mesh = new THREE.Mesh(geometry, materials.get("tree trunk basic material"));
+    mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
     tree.add(mesh);
 
     //branch
     geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 50);
-    mesh = new THREE.Mesh(geometry, materials.get("tree trunk basic material"));
+    mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
     mesh.rotation.z = Math.PI/4; 
     mesh.position.set(-1, 1.5, 0);
     tree.add(mesh);
 
     //branch
     geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 50);
-    mesh = new THREE.Mesh(geometry, materials.get("tree trunk basic material"));
+    mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
     mesh.rotation.z = -Math.PI/4; 
     mesh.position.set(1, 2.5, 0);
     tree.add(mesh);
 
     //branch
     geometry = new THREE.CylinderGeometry(0.25, 0.25, 2, 50);
-    mesh = new THREE.Mesh(geometry, materials.get("tree trunk basic material"));
+    mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
     mesh.rotation.z = Math.PI/4; 
     mesh.position.set(0.5, 4, 0);
     tree.add(mesh);
@@ -261,7 +372,7 @@ function createTree() {
     geometry = new THREE.SphereGeometry(1.5, 32, 16);
     geometry.rotateZ(Math.PI/2);
     geometry.scale(2, 1, 1);
-    mesh = new THREE.Mesh(geometry, materials.get("tree foliage basic material"));
+    mesh = new THREE.Mesh(geometry, materials.get("tree foliage"));
     mesh.position.set(-4, 3, 0);
     tree.add(mesh);
 
@@ -269,7 +380,7 @@ function createTree() {
     geometry = new THREE.SphereGeometry(1.5, 32, 16);
     geometry.rotateZ(Math.PI/2);
     geometry.scale(2, 1, 1);
-    mesh = new THREE.Mesh(geometry, materials.get("tree foliage basic material"));
+    mesh = new THREE.Mesh(geometry, materials.get("tree foliage"));
     mesh.position.set(1, 5, 0);
     tree.add(mesh);
 
@@ -341,8 +452,13 @@ function createOVNILights() {
         ovni.add(pivot);
         
         geometry = new THREE.SphereGeometry(0.25, 25, 50, 0, 2 * Math.PI, 0, 0.5 * Math.PI);
+        
+        var pointLight = new THREE.PointLight(0xFFFFFF, 0.1);
+        pointLight.position.set(0, 0, 0);
+
         mesh = new THREE.Mesh(geometry, materials.get("light"));
         mesh.rotation.x = Math.PI;
+        mesh.add(pointLight);
         mesh.position.set(1.5, -0.25, 0);
 
         pivot.add(mesh);
@@ -367,10 +483,17 @@ function createOVNI(x, y, z) {
     mesh.position.set(0, 0.4, 0);
     ovni.add(mesh);
 
+
+    var spotLight = new THREE.SpotLight(0xede0c2, 0.4);
+    spotLight.position.set(0, 0, 0);
+    spotLight.target.position.set(0, -23.55, 0);
     // cilinder
     geometry = new THREE.CylinderGeometry(1.25, 1.25, 0.15, 50);
     mesh = new THREE.Mesh(geometry, materials.get("beam"));
     mesh.position.set(0, -0.45, 0);
+    mesh.add(spotLight);
+    mesh.add(spotLight.target);
+
     ovni.add(mesh);
     
     createOVNILights();
@@ -402,7 +525,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
 
     vertices = new Float32Array([
@@ -417,7 +540,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
 
     vertices = new Float32Array([
@@ -432,7 +555,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
 
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
 
     vertices = new Float32Array([
@@ -447,7 +570,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
     
     wall.position.set(x, y, z);
@@ -473,7 +596,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
     
     wall.position.set(x, y, z);
@@ -499,7 +622,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
 
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
 
     vertices = new Float32Array([
@@ -514,7 +637,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
 
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
 
     vertices = new Float32Array([
@@ -529,7 +652,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
 
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
 
     vertices = new Float32Array([
@@ -544,7 +667,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
 
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
 
     vertices = new Float32Array([
@@ -559,7 +682,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
 
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
 
     vertices = new Float32Array([
@@ -574,7 +697,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
 
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
 
     vertices = new Float32Array([
@@ -589,7 +712,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
     
     wall.position.set(x, y, z);
@@ -615,7 +738,7 @@ function createWalls(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("wall basic material"));
+    var component = new THREE.Mesh(g, materials.get("wall"));
     wall.add(component);
     
     wall.position.set(x, y, z);
@@ -645,7 +768,7 @@ function createDoorAndWindows(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("window basic material"));
+    var component = new THREE.Mesh(g, materials.get("window"));
     deco.add(component);
 
     // WINDOWS
@@ -661,7 +784,7 @@ function createDoorAndWindows(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("window basic material"));
+    var component = new THREE.Mesh(g, materials.get("window"));
     deco.add(component);
 
     vertices = new Float32Array([
@@ -676,7 +799,7 @@ function createDoorAndWindows(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("window basic material"));
+    var component = new THREE.Mesh(g, materials.get("window"));
     deco.add(component);
 
     vertices = new Float32Array([
@@ -696,7 +819,7 @@ function createDoorAndWindows(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("window basic material"));
+    var component = new THREE.Mesh(g, materials.get("window"));
     deco.add(component);
 
     deco.position.set(x, y, z);
@@ -725,7 +848,7 @@ function createCeiling(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
+    var component = new THREE.Mesh(g, materials.get("ceiling"));
     ceiling.add(component);
 
     vertices = new Float32Array([
@@ -740,7 +863,7 @@ function createCeiling(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
+    var component = new THREE.Mesh(g, materials.get("ceiling"));
     ceiling.add(component);
 
     vertices = new Float32Array([
@@ -758,7 +881,7 @@ function createCeiling(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
     
-    var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
+    var component = new THREE.Mesh(g, materials.get("ceiling"));
     ceiling.add(component);
 
     vertices = new Float32Array([
@@ -776,7 +899,7 @@ function createCeiling(x, y, z) {
     g.setIndex(new THREE.BufferAttribute(indices, 1));
     g.computeVertexNormals();
 
-    var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
+    var component = new THREE.Mesh(g, materials.get("ceiling"));
     ceiling.add(component);
 
     ceiling.position.set(x, y, z);
@@ -801,45 +924,26 @@ function createHouse(x, y, z) {
 /*      LIGHTS       */
 ///////////////////////
 
-/*
-function createSpotLight(x, y, z) {
-    'use strict';
-
-    var light = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, 1.25, 150), new THREE.MeshBasicMaterial({ color: 0x5d4a80}));
-
-    light.position.set(x, y + 0.2, z);
-    scene.add(light);
-
-    var view = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 3, 7.5, 150), new THREE.MeshBasicMaterial({ color: 0x5d4a80}));
-    view.position.set(0, -4, 0);
-
-    light.add(view);
-}
-
 function updateLights() {
     'use strict';
-    pointLight1.visible = !pointLight1.visible;
-    pointLight2.visible = !pointLight2.visible;
-    pointLight3.visible = !pointLight3.visible;
-    pointLight4.visible = !pointLight4.visible;
-    pointLight5.visible = !pointLight5.visible;
-    pointLight6.visible = !pointLight6.visible;
-    pointLight7.visible = !pointLight7.visible;
-    pointLight8.visible = !pointLight8.visible;
+    for (let i = 3; i < 11; i++) {
+    ovni.children[i].children[0].children[0].visible = !ovni.children[i].children[0].children[0].visible;
+    }
 }
-*/
 
 ///////////////////////
 /* SHADE CALCULATION */
 ///////////////////////
-function updateShadeCalculation(){
+function updateShadeCalculation() {
     'use strict';
-    if (shadeCalculation) {
-
-    } else {
-
-    }
     shadeCalculation = !shadeCalculation;
+    if (!shadeCalculation) {
+        whatMaterial = "basic";
+        updateMaterials();
+    } else {
+        whatMaterial = "lambert";
+        updateMaterials();
+    }
 }
 
 //////////////////////
@@ -864,7 +968,7 @@ function handleCollisions(){
 function update(delta) {
     'use strict';
     
-    updateMaterials();
+    //updateMaterials();
     ovni.rotation.y += 0.01;
 
     movementVector.set(0, 0);
@@ -913,7 +1017,6 @@ function init() {
     document.body.appendChild(VRButton.createButton(renderer));
 
     createMaterials();
-    updateMaterials();
     createScene();
     createCameras();
 
@@ -989,15 +1092,15 @@ function onKeyDown(e) {
             console.log("update shade calculation");
             break;
         case 83: // s -> luz spotlight
-            spotLight.visible = !spotLight.visible;
-            console.log("spotlight is visible: " + spotLight.visible);
+            ovni.children[2].children[0].visible = !ovni.children[2].children[0].visible;
+            console.log("spotlight is visible: " + ovni.children[2].children[0].visible);
             break;
         case 68: // d -> luz global
             globalLight.visible = !globalLight.visible;
             console.log("global light is visible: " + globalLight.visible);
             break;
         case 81: // q -> sombreamento Gouraud
-            whatMaterial = "gourard";
+            whatMaterial = "lambert";
             updateMaterials();
             console.log("material: " + whatMaterial);
             break;
@@ -1009,7 +1112,7 @@ function onKeyDown(e) {
         case 69: // e -> sombreamento Cartoon
             whatMaterial = "toon";
             updateMaterials();
-            console.log("material: " + whatMaterial);
+            console.log("material: " + whatMaterial);            
             break;
     }
 }

@@ -274,8 +274,8 @@ function createTree() {
     tree.add(mesh);
 
     var spawnArea = new THREE.Box3(
-        new THREE.Vector3(-25, 0, -25), // Min coordinates of the spawn area
-        new THREE.Vector3(25, 0, 25)    // Max coordinates of the spawn area
+        new THREE.Vector3(-50, 0, -50), // Min coordinates of the spawn area
+        new THREE.Vector3(50, 0, 50)    // Max coordinates of the spawn area
       );
     
     const housePos = new THREE.Vector3(house.position.x - 4, 0, house.position.z - 7);
@@ -400,6 +400,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -414,6 +415,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -428,6 +430,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
 
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -442,6 +445,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -467,6 +471,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -492,6 +497,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
 
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -506,6 +512,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
 
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -520,6 +527,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
 
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -534,6 +542,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
 
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -548,6 +557,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
 
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -562,6 +572,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
 
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -576,6 +587,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -601,6 +613,7 @@ function createWalls(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("wall basic material"));
     wall.add(component);
@@ -630,6 +643,7 @@ function createDoorAndWindows(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("window basic material"));
     deco.add(component);
@@ -645,6 +659,7 @@ function createDoorAndWindows(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("window basic material"));
     deco.add(component);
@@ -659,6 +674,7 @@ function createDoorAndWindows(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("window basic material"));
     deco.add(component);
@@ -678,6 +694,7 @@ function createDoorAndWindows(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("window basic material"));
     deco.add(component);
@@ -706,6 +723,7 @@ function createCeiling(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
     ceiling.add(component);
@@ -720,6 +738,7 @@ function createCeiling(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
     ceiling.add(component);
@@ -737,6 +756,7 @@ function createCeiling(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
+    g.computeVertexNormals();
     
     var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
     ceiling.add(component);
@@ -754,7 +774,8 @@ function createCeiling(x, y, z) {
     var g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     g.setIndex(new THREE.BufferAttribute(indices, 1));
-    
+    g.computeVertexNormals();
+
     var component = new THREE.Mesh(g, materials.get("ceiling basic material"));
     ceiling.add(component);
 

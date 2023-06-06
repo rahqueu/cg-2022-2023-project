@@ -44,7 +44,7 @@ function createScene(){
     createTree();
 
     createSkydome(0, 0, 0);
-    createTerrain(0, -1.5, 0);
+    createTerrain(0, -5.5, 0);
 
     //directional light
     globalLight.position.set(moon.position.x, moon.position.y, moon.position.z);
@@ -174,8 +174,8 @@ function createCameras() {
     const positions = new Array(new Array(-50, 0, 0), // frontal
                                 new Array(0, 0, -50), // lateral
                                 new Array(0, 50, 0), // baixo
-                                new Array(15, 10, 15), // perspetiva isométrica - projeção ortogonal
-                                new Array(50, 50, 50), // perspetiva isométrica - projeção perspetiva
+                                new Array(15, 20, 15), // perspetiva isométrica - projeção ortogonal
+                                new Array(30, 30, 30), // perspetiva isométrica - projeção perspetiva
                                 new Array(-50, 50, -50)); // perspetiva isométrica - projeção perspetiva
 
     for (let i = 0; i < 6; i++) {
@@ -194,7 +194,7 @@ function createCameras() {
         camera.lookAt(scene.position);
         cameras.push(camera);
     }
-    camera = cameras[5];
+    camera = cameras[4];
 }
 
 /////////////////////
@@ -207,7 +207,10 @@ function createCameras() {
 
 function createMaterials() {
     'use strict';
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load ('js/heightmap/heightmap1.png');
     
+    materials.set("terrain", new THREE.MeshStandardMaterial({wireframe: false, side: THREE.DoubleSide, displacementMap: texture, displacementScale: 20}));
     // TODO: update house materials
     materials.set("moon", new THREE.MeshLambertMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcba03 }));
     materials.set("ovni", new THREE.MeshLambertMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
@@ -219,10 +222,7 @@ function createMaterials() {
     materials.set("ceiling", new THREE.MeshLambertMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }))
     materials.set("tree trunk", new THREE.MeshLambertMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }))
     materials.set("tree foliage", new THREE.MeshLambertMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }))
-    materials.set("skydome", new THREE.MeshLambertMaterial({wireframe: false, side: THREE.DoubleSide }));
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load ('js/heightmap/heightmap1.png');
-    materials.set("terrain", new THREE.MeshLambertMaterial({wireframe: false, side: THREE.DoubleSide, displacementMap: texture, displacementScale: 20}));
+    materials.set("skydome", new THREE.MeshBasicMaterial({wireframe: false, side: THREE.DoubleSide }));
     createLambertMaterials();
     createPhongMaterials();
     createToonMaterials();
@@ -449,7 +449,7 @@ function createSkydome(x, y , z) {
 
     skydome = new THREE.Object3D();
 
-    geometry = new THREE.SphereGeometry(30, 64, 32, Math.PI, Math.PI*2, 3*Math.PI/2);
+    geometry = new THREE.SphereGeometry(70, 64, 32, Math.PI, Math.PI*2, 3*Math.PI/2);
     
     mesh = new THREE.Mesh(geometry, materials.get("skydome"));
 
@@ -461,13 +461,9 @@ function createSkydome(x, y , z) {
 
 function createTerrain(x, y, z) {
     'use strict';
-
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load ('js/heightmap/heightmap1.png');
     terrain = new THREE.Object3D;
-    geometry = new THREE.PlaneGeometry(60, 60, 100, 100);
+    geometry = new THREE.PlaneGeometry(150, 150, 100, 100);
     
-    materials.set("terrain", new THREE.MeshStandardMaterial({wireframe: false, side: THREE.DoubleSide, displacementMap: texture, displacementScale: 5}));
     mesh = new THREE.Mesh(geometry, materials.get("terrain"));
 
     terrain.add(mesh);
@@ -1219,7 +1215,7 @@ function onKeyDown(e) {
             camera = cameras[4];
             break;
         case 54: // 6
-            camera = cameras[5];
+            camera = cameras[0];
             break;
         case 37: // arrow
         case 38: // arrow

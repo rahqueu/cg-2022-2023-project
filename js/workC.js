@@ -12,12 +12,10 @@ var treePos = [];
 
 // lights
 var ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+
 var globalLight = new THREE.DirectionalLight(0xFFEA00, 0.8);
- // 0.5, 7.5, Math.PI / 4.0, 0.5, 1);
 
 var whatMaterial = "lambert";
-
-
 
 // materials
 const materials = new Map(), materialsLambert = new Map(), materialsPhong = new Map(), materialsToon = new Map(), materialsBasic = new Map(), clock = new THREE.Clock();
@@ -52,9 +50,15 @@ function createScene(){
     scene.add(globalLight);
     scene.add(globalLight.target);
 
+    //const globalLightHelper = new THREE.PointLightHelper( globalLight, 1 );
+    //scene.add(globalLightHelper);
+
     //ambient light
-    scene.add(ambientLight);
-    ambientLight.visible = true;    
+    const ambientLightHelper = new THREE.PointLightHelper( ambientLight, 1 );
+    scene.add(ambientLightHelper);
+
+    //scene.add(ambientLight);
+    //ambientLight.visible = true;    
 
     console.log(ovni.children.length);
     console.log(house.children.length);
@@ -455,6 +459,8 @@ function createOVNILights() {
         
         var pointLight = new THREE.PointLight(0xFFFFFF, 0.1);
         pointLight.position.set(0, 0, 0);
+        //const pointLightHelper = new THREE.PointLightHelper( pointLight, 1 );
+        //scene.add(pointLightHelper);
 
         mesh = new THREE.Mesh(geometry, materials.get("light"));
         mesh.rotation.x = Math.PI;
@@ -493,6 +499,9 @@ function createOVNI(x, y, z) {
     mesh.position.set(0, -0.45, 0);
     mesh.add(spotLight);
     mesh.add(spotLight.target);
+
+    //const spotLightHelper = new THREE.PointLightHelper( spotLight, 1 );
+    //scene.add(spotLightHelper);
 
     ovni.add(mesh);
     

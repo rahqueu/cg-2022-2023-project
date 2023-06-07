@@ -6,9 +6,10 @@ var cameras = [], camera, scene, bufferSceneTerrain, bufferTextureTerrain, buffe
 
 var geometry, mesh;
 
-var moon, ovni, house, tree, skydome, terrain;
+var moon, ovni, house, tree;
+var skydome, terrain;
 
-var treePos = [];
+var treePos = [], trees = [];
 
 // lights
 var ambientLight = new THREE.AmbientLight(0x404040, 0.3);
@@ -84,6 +85,7 @@ function createTerrainScene() {
     //bufferTexture.texture.repeat.set(4,4);
     materials.get("terrain").map = bufferTextureTerrain.texture;
     materials.get("terrain").needsUpdate = true;
+
 }
 
 function checkCollision(obj, tempX, tempY, r) {
@@ -209,8 +211,9 @@ function createMaterials() {
     'use strict';
     const loader = new THREE.TextureLoader();
     const texture = loader.load ('js/heightmap/heightmap1.png');
-    
-    materials.set("terrain", new THREE.MeshStandardMaterial({wireframe: false, side: THREE.DoubleSide, displacementMap: texture, displacementScale: 20}));
+
+    materials.set("skydome", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide }));
+    materials.set("terrain", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide, displacementMap: texture, displacementScale: 20}));
     // TODO: update house materials
     materials.set("moon", new THREE.MeshLambertMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcba03 }));
     materials.set("ovni", new THREE.MeshLambertMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
@@ -222,7 +225,7 @@ function createMaterials() {
     materials.set("ceiling", new THREE.MeshLambertMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }))
     materials.set("tree trunk", new THREE.MeshLambertMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }))
     materials.set("tree foliage", new THREE.MeshLambertMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }))
-    materials.set("skydome", new THREE.MeshBasicMaterial({wireframe: false, side: THREE.DoubleSide }));
+    
     createLambertMaterials();
     createPhongMaterials();
     createToonMaterials();
@@ -322,12 +325,26 @@ function updateMaterials() {
             house.children[5].children[i].material = materialsLambert.get("ceiling");
         }
 
-        tree.children[0].material = materialsLambert.get("tree trunk");
-        tree.children[1].material = materialsLambert.get("tree trunk");
-        tree.children[2].material = materialsLambert.get("tree trunk");
-        tree.children[3].material = materialsLambert.get("tree trunk");
-        tree.children[4].material = materialsLambert.get("tree foliage");
-        tree.children[5].material = materialsLambert.get("tree foliage");
+        trees[0].children[0].material = materialsLambert.get("tree trunk");
+        trees[0].children[1].material = materialsLambert.get("tree trunk");
+        trees[0].children[2].material = materialsLambert.get("tree trunk");
+        trees[0].children[3].material = materialsLambert.get("tree trunk");
+        trees[0].children[4].material = materialsLambert.get("tree foliage");
+        trees[0].children[5].material = materialsLambert.get("tree foliage");
+
+        trees[1].children[0].material = materialsLambert.get("tree trunk");
+        trees[1].children[1].material = materialsLambert.get("tree trunk");
+        trees[1].children[2].material = materialsLambert.get("tree trunk");
+        trees[1].children[3].material = materialsLambert.get("tree trunk");
+        trees[1].children[4].material = materialsLambert.get("tree foliage");
+        trees[1].children[5].material = materialsLambert.get("tree foliage");
+
+        trees[2].children[0].material = materialsLambert.get("tree trunk");
+        trees[2].children[1].material = materialsLambert.get("tree trunk");
+        trees[2].children[2].material = materialsLambert.get("tree trunk");
+        trees[2].children[3].material = materialsLambert.get("tree trunk");
+        trees[2].children[4].material = materialsLambert.get("tree foliage");
+        trees[2].children[5].material = materialsLambert.get("tree foliage");
 
         materialsLambert.shading = THREE.FlatShading;
         materialsLambert.shading = THREE.SmoothShading;
@@ -361,12 +378,26 @@ function updateMaterials() {
             house.children[5].children[i].material = materialsPhong.get("ceiling");
         }
 
-        tree.children[0].material = materialsPhong.get("tree trunk");
-        tree.children[1].material = materialsPhong.get("tree trunk");
-        tree.children[2].material = materialsPhong.get("tree trunk");
-        tree.children[3].material = materialsPhong.get("tree trunk");
-        tree.children[4].material = materialsPhong.get("tree foliage");
-        tree.children[5].material = materialsPhong.get("tree foliage");
+        trees[0].children[0].material = materialsPhong.get("tree trunk");
+        trees[0].children[1].material = materialsPhong.get("tree trunk");
+        trees[0].children[2].material = materialsPhong.get("tree trunk");
+        trees[0].children[3].material = materialsPhong.get("tree trunk");
+        trees[0].children[4].material = materialsPhong.get("tree foliage");
+        trees[0].children[5].material = materialsPhong.get("tree foliage");
+
+        trees[1].children[0].material = materialsPhong.get("tree trunk");
+        trees[1].children[1].material = materialsPhong.get("tree trunk");
+        trees[1].children[2].material = materialsPhong.get("tree trunk");
+        trees[1].children[3].material = materialsPhong.get("tree trunk");
+        trees[1].children[4].material = materialsPhong.get("tree foliage");
+        trees[1].children[5].material = materialsPhong.get("tree foliage");
+
+        trees[2].children[0].material = materialsPhong.get("tree trunk");
+        trees[2].children[1].material = materialsPhong.get("tree trunk");
+        trees[2].children[2].material = materialsPhong.get("tree trunk");
+        trees[2].children[3].material = materialsPhong.get("tree trunk");
+        trees[2].children[4].material = materialsPhong.get("tree foliage");
+        trees[2].children[5].material = materialsPhong.get("tree foliage");
 
         materialsPhong.shading = THREE.FlatShading;
         materialsPhong.shading = THREE.SmoothShading;
@@ -400,12 +431,26 @@ function updateMaterials() {
             house.children[5].children[i].material = materialsToon.get("ceiling");
         }
 
-        tree.children[0].material = materialsToon.get("tree trunk");
-        tree.children[1].material = materialsToon.get("tree trunk");
-        tree.children[2].material = materialsToon.get("tree trunk");
-        tree.children[3].material = materialsToon.get("tree trunk");
-        tree.children[4].material = materialsToon.get("tree foliage");
-        tree.children[5].material = materialsToon.get("tree foliage");
+        trees[0].children[0].material = materialsToon.get("tree trunk");
+        trees[0].children[1].material = materialsToon.get("tree trunk");
+        trees[0].children[2].material = materialsToon.get("tree trunk");
+        trees[0].children[3].material = materialsToon.get("tree trunk");
+        trees[0].children[4].material = materialsToon.get("tree foliage");
+        trees[0].children[5].material = materialsToon.get("tree foliage");
+
+        trees[1].children[0].material = materialsToon.get("tree trunk");
+        trees[1].children[1].material = materialsToon.get("tree trunk");
+        trees[1].children[2].material = materialsToon.get("tree trunk");
+        trees[1].children[3].material = materialsToon.get("tree trunk");
+        trees[1].children[4].material = materialsToon.get("tree foliage");
+        trees[1].children[5].material = materialsToon.get("tree foliage");
+
+        trees[2].children[0].material = materialsToon.get("tree trunk");
+        trees[2].children[1].material = materialsToon.get("tree trunk");
+        trees[2].children[2].material = materialsToon.get("tree trunk");
+        trees[2].children[3].material = materialsToon.get("tree trunk");
+        trees[2].children[4].material = materialsToon.get("tree foliage");
+        trees[2].children[5].material = materialsToon.get("tree foliage");
 
     } else if (whatMaterial == "basic") {
 
@@ -435,12 +480,26 @@ function updateMaterials() {
             house.children[5].children[i].material = materialsBasic.get("ceiling");
         }
 
-        tree.children[0].material = materialsBasic.get("tree trunk");
-        tree.children[1].material = materialsBasic.get("tree trunk");
-        tree.children[2].material = materialsBasic.get("tree trunk");
-        tree.children[3].material = materialsBasic.get("tree trunk");
-        tree.children[4].material = materialsBasic.get("tree foliage");
-        tree.children[5].material = materialsBasic.get("tree foliage");
+        trees[0].children[0].material = materialsBasic.get("tree trunk");
+        trees[0].children[1].material = materialsBasic.get("tree trunk");
+        trees[0].children[2].material = materialsBasic.get("tree trunk");
+        trees[0].children[3].material = materialsBasic.get("tree trunk");
+        trees[0].children[4].material = materialsBasic.get("tree foliage");
+        trees[0].children[5].material = materialsBasic.get("tree foliage");
+
+        trees[1].children[0].material = materialsBasic.get("tree trunk");
+        trees[1].children[1].material = materialsBasic.get("tree trunk");
+        trees[1].children[2].material = materialsBasic.get("tree trunk");
+        trees[1].children[3].material = materialsBasic.get("tree trunk");
+        trees[1].children[4].material = materialsBasic.get("tree foliage");
+        trees[1].children[5].material = materialsBasic.get("tree foliage");
+
+        trees[2].children[0].material = materialsBasic.get("tree trunk");
+        trees[2].children[1].material = materialsBasic.get("tree trunk");
+        trees[2].children[2].material = materialsBasic.get("tree trunk");
+        trees[2].children[3].material = materialsBasic.get("tree trunk");
+        trees[2].children[4].material = materialsBasic.get("tree foliage");
+        trees[2].children[5].material = materialsBasic.get("tree foliage");
     }
 }
 
@@ -560,6 +619,8 @@ function createTree() {
 
         treePos.push(randomPos);
     }
+
+    trees.push(tree);
 }
 
 function createMoon(x, y, z) {

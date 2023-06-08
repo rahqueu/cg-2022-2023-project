@@ -39,14 +39,14 @@ function createScene(){
     scene.background = new THREE.Color('#262626')
     scene.add(new THREE.AxesHelper(50));
 
-    createMoon(0, 40, 0);
-    createOVNI(5, 25, 0);
+    createMoon(0, 28, 0);
+    createOVNI(5, 23, 0);
     createHouse(0, 0, 0);
     createTree();
     createTree();
     createTree();
 
-    createSkydome(0, 0, 0);
+    createSkydome(0, -8, 0);
     createTerrain(0, -5.5, 0);
 
     //directional light
@@ -76,7 +76,7 @@ function createTerrainScene() {
     'use strict';
     bufferSceneTerrain = new THREE.Scene();
     bufferSceneTerrain.background = new THREE.Color('#4CBB17');
-    bufferTextureTerrain = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight,  {minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
+    bufferTextureTerrain = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { wrapT: THREE.RepeatWrapping, wrapS: THREE.RepeatWrapping, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
     createFlowers();
     
     renderer.setRenderTarget(bufferTextureTerrain);
@@ -84,88 +84,24 @@ function createTerrainScene() {
     
     renderer.setRenderTarget(null);
     
-    //bufferTexture.texture.repeat.set(4,4);
+    bufferTextureTerrain.texture.repeat.set(2,2);
     materials.get("terrain").map = bufferTextureTerrain.texture;
     materials.get("terrain").needsUpdate = true;
 
 }
 
-function checkCollision(obj, tempX, tempY, r) {
-    var d = ((tempX - obj.position.x) * (tempX - obj.position.x) + 
-    (tempY - obj.position.y) * (tempY - obj.position.y));
-    return (r >= d);
-}
-
-function createFlowers() {
-    let colors = [];
-    colors[0] = 0xffffff; // white
-    colors[1] = 0xFFEA00; //yellow
-    colors[2] = 0xC8A2C8; //lilac
-    colors[3] = 0x89cff0; //baby blue
-    var c = 0;
-    let flowers = [];
-    for (let i = 0; i < 300; i++) {
-        var flower = new THREE.Object3D;
-        geometry = new THREE.SphereGeometry(0.2, 32, 16);
-        
-        var mat = new THREE.MeshBasicMaterial({color: colors[c++], wireframe: false, side: THREE.DoubleSide}); 
-        mesh = new THREE.Mesh(geometry, mat);
-        flower.add(mesh);
-
-        handlePosition(0.4 * 0.4, flowers, flower, i);
-        bufferSceneTerrain.add(flower);
-        if (c == 4) c = 0;
-    }
-
-}
-
-function handlePosition(radius, objs, obj, numObjs) {
-    var spawnArea = new THREE.Box3(
-        new THREE.Vector3(-28, -14, 0), // Min coordinates of the spawn area
-        new THREE.Vector3(28, 14, 0)    // Max coordinates of the spawn area
-    );
-    var tempX = THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x);
-    var tempY = THREE.MathUtils.randFloat(spawnArea.min.y, spawnArea.max.y);
-
-    let j = 0;
-    while(j < numObjs) {
-        if (checkCollision(objs[j], tempX, tempY, radius)) {
-            tempX = THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x);
-            tempY = THREE.MathUtils.randFloat(spawnArea.min.y, spawnArea.max.y);
-            j = 0;
-        } else {
-            j++;
-        }
-    }
-    objs[numObjs] = obj;
-    obj.position.set(tempX, tempY, 0);
-}
-
-function createStars() {
-    let stars = [];
-    for (let i = 0; i < 1000; i++) {
-        var star = new THREE.Object3D;
-        geometry = new THREE.SphereGeometry(0.1, 32, 16);
-        
-        var mat = new THREE.MeshBasicMaterial({color: 0xffffff, wireframe: false, side: THREE.DoubleSide}); 
-        mesh = new THREE.Mesh(geometry, mat);
-        star.add(mesh);
-        handlePosition(0.2 * 0.2, stars, star, i);
-        bufferSceneSky.add(star);
-    }
-}
-
 function createSkyScene() {
     'use strict';
     bufferSceneSky = new THREE.Scene();
-    bufferSceneSky.background = new THREE.Color('#324ab2');
-    bufferTextureSky = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
+    bufferTextureSky = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { wrapT: THREE.RepeatWrapping, wrapS: THREE.RepeatWrapping, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
+    createDegrade();
     createStars();
-
+    
     renderer.setRenderTarget(bufferTextureSky);
     renderer.render(bufferSceneSky, cameras[1]);
     renderer.setRenderTarget(null);
     
+    bufferTextureSky.texture.repeat.set(2 , 2);
     materials.get("skydome").map = bufferTextureSky.texture;
     materials.get("skydome").needsUpdate = true;
 }
@@ -178,8 +114,8 @@ function createCameras() {
     const positions = new Array(new Array(-50, 0, 0), // frontal
                                 new Array(0, 0, -50), // lateral
                                 new Array(0, 50, 0), // baixo
-                                new Array(15, 20, 15), // perspetiva isométrica - projeção ortogonal
-                                new Array(30, 30, 30), // perspetiva isométrica - projeção perspetiva
+                                new Array(70, 70, 70), // perspetiva isométrica - projeção ortogonal
+                                new Array(35, 25, 35), // perspetiva isométrica - projeção perspetiva
                                 new Array(-50, 50, -50)); // perspetiva isométrica - projeção perspetiva
 
     for (let i = 0; i < 6; i++) {
@@ -215,7 +151,7 @@ function createMaterials() {
     const texture = loader.load ('js/heightmap/heightmap1.png');
 
     materials.set("skydome", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide }));
-    materials.set("terrain", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide, displacementMap: texture, displacementScale: 20}));
+    materials.set("terrain", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide, bumpMap: texture, bumpScale: 5, displacementMap: texture, displacementScale: 20}));
     // TODO: update house materials
     materials.set("moon", new THREE.MeshLambertMaterial({ color: 0xfcba03, wireframe: false, emissive: 0xfcba03 }));
     materials.set("ovni", new THREE.MeshLambertMaterial({ color: 0x707070, wireframe: false, side: THREE.DoubleSide }));
@@ -505,12 +441,75 @@ function updateMaterials() {
     }
 }
 
+function createFlowers() {
+    'use strict';
+    let colors = [];
+    colors[0] = 0xffffff; // white
+    colors[1] = 0xFFEA00; //yellow
+    colors[2] = 0xC8A2C8; //lilac
+    colors[3] = 0x89cff0; //baby blue
+    var c = 0;
+    let flowers = [];
+    for (let i = 0; i < 100; i++) {
+        var flower = new THREE.Object3D;
+        geometry = new THREE.CircleGeometry(0.2, 32, 16);
+        
+        var mat = new THREE.MeshBasicMaterial({color: colors[c++], wireframe: false, side: THREE.DoubleSide}); 
+        mesh = new THREE.Mesh(geometry, mat);
+        flower.add(mesh);
+
+        handlePosition(0.4 * 0.4, flowers, flower, i);
+        bufferSceneTerrain.add(flower);
+        if (c == 4) c = 0;
+    }
+
+}
+
+function createStars() {
+    'use strict';
+    let stars = [];
+    for (let i = 0; i < 200; i++) {
+        var star = new THREE.Object3D;
+        geometry = new THREE.SphereGeometry(0.05, 32, 16);
+        
+        var mat = new THREE.MeshBasicMaterial({color: 0xffffff, wireframe: false, side: THREE.DoubleSide}); 
+        mesh = new THREE.Mesh(geometry, mat);
+        star.add(mesh);
+        handlePosition(0.2 * 0.2, stars, star, i);
+        bufferSceneSky.add(star);
+    }
+}
+
+function createDegrade() {
+    'use strict';
+    var degrade = new THREE.Object3D;
+    geometry = new THREE.PlaneGeometry(window.innerWidth, 30, 1, 1);
+
+    let a = { r: 0.00, g: 0.0467, b: 0.280 } // Dark blue
+    let b = { r: 0.224, g: 0.00, b: 0.280 }  // Dark purple
+
+    var colors = new Float32Array([
+        a.r, a.g, a.b,      // top left
+        a.r, a.g, a.b,      // top right
+        b.r, b.g, b.b,      // bottom left
+        b.r, b.g, b.b ]);   // bottom right
+
+    // Set the vertex colors
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    var material = new THREE.MeshBasicMaterial({ vertexColors: true, wireframe: false, side: THREE.DoubleSide});
+    mesh = new THREE.Mesh(geometry, material);
+    degrade.add(mesh);
+    degrade.position.set(0, 0, 0);
+    bufferSceneSky.add(mesh);
+}
+
 function createSkydome(x, y , z) {
     'use strict';
 
     skydome = new THREE.Object3D();
 
-    geometry = new THREE.SphereGeometry(70, 64, 32, Math.PI, Math.PI*2, 3*Math.PI/2);
+    geometry = new THREE.SphereGeometry(70, 32, 16, 0, 2 * Math.PI, 0, 0.5 * Math.PI);
     
     mesh = new THREE.Mesh(geometry, materials.get("skydome"));
 
@@ -630,7 +629,7 @@ function createMoon(x, y, z) {
 
     moon = new THREE.Object3D();
 
-    geometry = new THREE.SphereGeometry(1, 25, 50);
+    geometry = new THREE.SphereGeometry(2, 64, 32);
     mesh = new THREE.Mesh(geometry, materials.get("moon"));
     moon.add(mesh);
 
@@ -1152,17 +1151,39 @@ function updateShadeCalculation() {
 //////////////////////
 /* CHECK COLLISIONS */
 //////////////////////
-function checkCollisions(){
-    'use strict';
 
+function checkCollisions(obj, tempX, tempY, r) {
+    'use strict';
+    var d = ((tempX - obj.position.x) * (tempX - obj.position.x) + 
+    (tempY - obj.position.y) * (tempY - obj.position.y));
+    return (r >= d);
 }
 
 ///////////////////////
 /* HANDLE COLLISIONS */
 ///////////////////////
-function handleCollisions(){
-    'use strict';
 
+function handlePosition(radius, objs, obj, numObjs) {
+    'use strict';
+    var spawnArea = new THREE.Box3(
+        new THREE.Vector3(-30, -14, 0), // Min coordinates of the spawn area
+        new THREE.Vector3(30, 14, 0)    // Max coordinates of the spawn area
+    );
+    var tempX = THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x);
+    var tempY = THREE.MathUtils.randFloat(spawnArea.min.y, spawnArea.max.y);
+
+    let j = 0;
+    while(j < numObjs) {
+        if (checkCollisions(objs[j], tempX, tempY, radius)) {
+            tempX = THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x);
+            tempY = THREE.MathUtils.randFloat(spawnArea.min.y, spawnArea.max.y);
+            j = 0;
+        } else {
+            j++;
+        }
+    }
+    objs[numObjs] = obj;
+    obj.position.set(tempX, tempY, 0);
 }
 
 ////////////
@@ -1264,7 +1285,7 @@ function onKeyDown(e) {
     'use strict';
 
     switch (e.keyCode) {
-        case 49: // 1 -> camera fixa projecção perspectiva para ver toda a cena
+        case 49: // 1 
             createTerrainScene();
             break;
         case 50: // 2

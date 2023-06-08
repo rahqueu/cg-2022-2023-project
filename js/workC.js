@@ -1,3 +1,5 @@
+//import { VRButton } from 'three/addons/webxr/VRButton.js';
+
 //////////////////////
 /* GLOBAL VARIABLES */
 //////////////////////
@@ -1210,11 +1212,12 @@ function init() {
     renderer = new THREE.WebGLRenderer({
         antialias: true
     });
+    renderer.setPixelRatio(window.devicePixelRatio); 
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.xr.enabled = true;
-
     document.body.appendChild(renderer.domElement);
+
+    renderer.xr.enabled = true;    
     document.body.appendChild(VRButton.createButton(renderer));
 
     createMaterials();
@@ -1236,7 +1239,8 @@ function animate() {
 
     update(delta);
     render();
-    requestAnimationFrame(animate);
+    //requestAnimationFrame(animate);
+    renderer.setAnimationLoop(animate);
 }
 
 ////////////////////////////

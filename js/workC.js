@@ -14,9 +14,9 @@ var skydome, terrain;
 var treePos = [], trees = [];
 
 // lights
-var ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+var ambientLight = new THREE.AmbientLight(0xa9c4e8, 0.35);
 
-var globalLight = new THREE.DirectionalLight(0xFFEA00, 0.8);
+var globalLight = new THREE.DirectionalLight(0xfff58a, 0.5);
 
 var whatMaterial = "lambert";
 
@@ -47,7 +47,7 @@ function createScene(){
     createTree();
 
     createSkydome(0, -10, 0);
-    createTerrain(0, -5.5, 0);
+    createTerrain(0, -6.5, 0);
 
     //directional light
     globalLight.position.set(moon.position.x, moon.position.y, moon.position.z);
@@ -60,11 +60,10 @@ function createScene(){
     //scene.add(globalLightHelper);
 
     //ambient light
-    const ambientLightHelper = new THREE.PointLightHelper( ambientLight, 1 );
-    scene.add(ambientLightHelper);
-
-    //scene.add(ambientLight);
-    //ambientLight.visible = true;    
+    //const ambientLightHelper = new THREE.PointLightHelper( ambientLight, 1 );
+    //scene.add(ambientLightHelper);
+    scene.add(ambientLight);
+    ambientLight.visible = true;    
 }
 
 function createTerrainScene() {
@@ -88,15 +87,16 @@ function createTerrainScene() {
 function createSkyScene() {
     'use strict';
     bufferSceneSky = new THREE.Scene();
-    bufferTextureSky = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { wrapT: THREE.RepeatWrapping, wrapS: THREE.RepeatWrapping, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
+    bufferTextureSky = new THREE.WebGLRenderTarget( 400, 400, { wrapT: THREE.RepeatWrapping, wrapS: THREE.RepeatWrapping, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
     createDegrade();
     createStars();
     
+    renderer.setSize(400, 400);
     renderer.setRenderTarget(bufferTextureSky);
     renderer.render(bufferSceneSky, cameras[1]);
     renderer.setRenderTarget(null);
-    
-    bufferTextureSky.texture.repeat.set(10 , 1);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    bufferTextureSky.texture.repeat.set(10 , 2);
     materials.get("skydome").map = bufferTextureSky.texture;
     materials.get("skydome").needsUpdate = true;
 }
@@ -109,9 +109,9 @@ function createCameras() {
     const positions = new Array(new Array(-50, 0, 0), // frontal
                                 new Array(0, 0, -50), // lateral
                                 new Array(0, 50, 0), // baixo
-                                new Array(70, 70, 70), // perspetiva isométrica - projeção ortogonal
+                                new Array(100, 200, 100), // perspetiva isométrica - projeção ortogonal
                                 new Array(35, 25, 35), // perspetiva isométrica - projeção perspetiva
-                                new Array(-50, 50, -50)); // perspetiva isométrica - projeção perspetiva
+                                new Array(-50, 100, -50)); // perspetiva isométrica - projeção perspetiva
 
     for (let i = 0; i < 6; i++) {
         if (i == 4 | i == 5) {
@@ -143,7 +143,7 @@ function createCameras() {
 function createMaterials() {
     'use strict';
     const loader = new THREE.TextureLoader();
-    const texture = loader.load ('https://web.tecnico.ulisboa.pt/~ist199238/heightmap.png');
+    const texture = loader.load ('js/heightmap/heightmap1.png');
 
     materials.set("skydome", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide }));
     materials.set("terrain", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide, bumpMap: texture, bumpScale: 5, displacementMap: texture, displacementScale: 20}));
@@ -486,7 +486,7 @@ function createDegrade() {
     var colors = new Float32Array([
         a.r, a.g, a.b,      // top left
         a.r, a.g, a.b,      // top right
-        b.r, b.g, b.b,      // bottom left
+        a.r, a.g, a.b,      // bottom left
         b.r, b.g, b.b ]);   // bottom right
 
     // Set the vertex colors
@@ -504,7 +504,7 @@ function createSkydome(x, y , z) {
 
     skydome = new THREE.Object3D();
 
-    geometry = new THREE.SphereGeometry(70, 32, 16, 0, 2 * Math.PI, 0, 0.5 * Math.PI);
+    geometry = new THREE.SphereGeometry(70, 32, 16);
     
     mesh = new THREE.Mesh(geometry, materials.get("skydome"));
 
@@ -654,8 +654,8 @@ function createOVNILights() {
         
         geometry = new THREE.SphereGeometry(0.25, 25, 50, 0, 2 * Math.PI, 0, 0.5 * Math.PI);
         
-        var pointLight = new THREE.PointLight(0xFFFFFF, 0.2);
-        pointLight.position.set(1.5, -0.5, 0);
+        var pointLight = new THREE.PointLight(0xFFFFFF, 0.15, 40, 1.5);
+        pointLight.position.set(0, 0, 0);
         //const pointLightHelper = new THREE.PointLightHelper( pointLight, 1 );
         //scene.add(pointLightHelper);
 
@@ -687,7 +687,7 @@ function createOVNI(x, y, z) {
     ovni.add(mesh);
 
 
-    var spotLight = new THREE.SpotLight(0xede0c2, 0.4);
+    var spotLight = new THREE.SpotLight(0xede0c2, 0.6, 0, Math.PI/6, 0);
     spotLight.position.set(0, 0, 0);
     spotLight.target.position.set(0, -23.55, 0);
     // cilinder
@@ -1303,7 +1303,7 @@ function onKeyDown(e) {
             camera = cameras[0];
             break;
         case 54: // 6
-            camera = cameras[1];
+            camera = cameras[5];
             break;
         case 37: // arrow
         case 38: // arrow

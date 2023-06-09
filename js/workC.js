@@ -4,7 +4,7 @@
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var cameras = [], camera, scene, bufferSceneTerrain, bufferTextureTerrain, bufferSceneSky, bufferTextureSky, renderer;
+var cameras = [], camera, scene, bufferSceneTerrain, bufferTextureTerrain, bufferSceneSky, bufferTextureSky, renderer, controls;
 
 var geometry, mesh;
 
@@ -46,7 +46,7 @@ function createScene(){
     createTree();
     createTree();
 
-    createSkydome(0, -10, 0);
+    createSkydome(0, -5, 0);
     createTerrain(0, -6.5, 0);
 
     //directional light
@@ -70,15 +70,15 @@ function createTerrainScene() {
     'use strict';
     bufferSceneTerrain = new THREE.Scene();
     bufferSceneTerrain.background = new THREE.Color('#4CBB17');
-    bufferTextureTerrain = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { wrapT: THREE.RepeatWrapping, wrapS: THREE.RepeatWrapping, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
+    bufferTextureTerrain = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, { wrapT: THREE.RepeatWrapping, wrapS: THREE.RepeatWrapping, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
     createFlowers();
     
     renderer.setRenderTarget(bufferTextureTerrain);
     renderer.render(bufferSceneTerrain, cameras[1]);
     
     renderer.setRenderTarget(null);
-    
-    bufferTextureTerrain.texture.repeat.set(3,3);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    bufferTextureTerrain.texture.repeat.set(3, 3);
     materials.get("terrain").map = bufferTextureTerrain.texture;
     materials.get("terrain").needsUpdate = true;
 
@@ -87,16 +87,14 @@ function createTerrainScene() {
 function createSkyScene() {
     'use strict';
     bufferSceneSky = new THREE.Scene();
-    bufferTextureSky = new THREE.WebGLRenderTarget( 400, 400, { wrapT: THREE.RepeatWrapping, wrapS: THREE.RepeatWrapping, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
+    bufferTextureSky = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, { wrapT: THREE.RepeatWrapping, wrapS: THREE.RepeatWrapping, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
     createDegrade();
     createStars();
     
-    renderer.setSize(400, 400);
     renderer.setRenderTarget(bufferTextureSky);
     renderer.render(bufferSceneSky, cameras[1]);
-    renderer.setRenderTarget(null);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    bufferTextureSky.texture.repeat.set(10 , 2);
+    renderer.setRenderTarget(null)
+    bufferTextureSky.texture.repeat.set(4 , 1);
     materials.get("skydome").map = bufferTextureSky.texture;
     materials.get("skydome").needsUpdate = true;
 }
@@ -130,6 +128,14 @@ function createCameras() {
         cameras.push(camera);
     }
     camera = cameras[4];
+    
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.maxDistance = 20;
+    controls.target.x = 35;
+    controls.target.y = 20;
+    controls.target.z = 35;
+    controls.update();
+    
 }
 
 /////////////////////
@@ -445,7 +451,7 @@ function createFlowers() {
     colors[3] = 0x89cff0; //baby blue
     var c = 0;
     let flowers = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 300; i++) {
         var flower = new THREE.Object3D;
         geometry = new THREE.CircleGeometry(0.2, 32, 16);
         
@@ -463,7 +469,7 @@ function createFlowers() {
 function createStars() {
     'use strict';
     let stars = [];
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 500; i++) {
         var star = new THREE.Object3D;
         geometry = new THREE.SphereGeometry(0.05, 32, 16);
         
@@ -478,7 +484,7 @@ function createStars() {
 function createDegrade() {
     'use strict';
     var degrade = new THREE.Object3D;
-    geometry = new THREE.PlaneGeometry(window.innerWidth, 30, 1, 1);
+    geometry = new THREE.PlaneGeometry(window.innerWidth, 50, 1, 1);
 
     let a = { r: 0.00, g: 0.0467, b: 0.280 } // Dark blue
     let b = { r: 0.224, g: 0.00, b: 0.280 }  // Dark purple
@@ -486,7 +492,7 @@ function createDegrade() {
     var colors = new Float32Array([
         a.r, a.g, a.b,      // top left
         a.r, a.g, a.b,      // top right
-        a.r, a.g, a.b,      // bottom left
+        b.r, b.g, b.b,      // bottom left
         b.r, b.g, b.b ]);   // bottom right
 
     // Set the vertex colors
@@ -495,7 +501,7 @@ function createDegrade() {
     var material = new THREE.MeshBasicMaterial({ vertexColors: true, wireframe: false, side: THREE.DoubleSide});
     mesh = new THREE.Mesh(geometry, material);
     degrade.add(mesh);
-    degrade.position.set(0, 0, 0);
+    degrade.position.set(0, 200, 0);
     bufferSceneSky.add(mesh);
 }
 
@@ -504,7 +510,7 @@ function createSkydome(x, y , z) {
 
     skydome = new THREE.Object3D();
 
-    geometry = new THREE.SphereGeometry(70, 32, 16);
+    geometry = new THREE.SphereGeometry(70, 32, 16, 0, 2 * Math.PI, 0, 0.5 * Math.PI);
     
     mesh = new THREE.Mesh(geometry, materials.get("skydome"));
 
@@ -1170,8 +1176,8 @@ function checkCollisions(obj, tempX, tempY, r) {
 function handlePosition(radius, objs, obj, numObjs) {
     'use strict';
     var spawnArea = new THREE.Box3(
-        new THREE.Vector3(-35, -16, 0), // Min coordinates of the spawn area
-        new THREE.Vector3(35, 16, 0)    // Max coordinates of the spawn area
+        new THREE.Vector3(-50, -30, 0), // Min coordinates of the spawn area
+        new THREE.Vector3(50, 30, 0)    // Max coordinates of the spawn area
     );
     var tempX = THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x);
     var tempY = THREE.MathUtils.randFloat(spawnArea.min.y, spawnArea.max.y);
@@ -1261,7 +1267,9 @@ function animate() {
     delta = clock.getDelta();
 
     update(delta);
+    controls.update();
     render();
+
     //requestAnimationFrame(animate);
     renderer.setAnimationLoop(animate);
 }

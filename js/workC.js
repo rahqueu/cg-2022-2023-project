@@ -38,7 +38,7 @@ function createScene(){
 
     createMoon(20, 29, -3);
     createOVNI(5, 23, 0);
-    createHouse(0, 0, 0);
+    createHouse(-23, 0, 6);
     createTree();
     createTree();
     createTree();
@@ -527,7 +527,7 @@ function createTree() {
         new THREE.Vector3(30, 0, 30)    // Max coordinates of the spawn area
       );
     
-    const housePos = new THREE.Vector3(house.position.x - 4, 0, house.position.z - 7);
+    const housePos = new THREE.Vector3(house.position.x - 27, 0, house.position.z - 1);
     var houseSize = new THREE.Vector3(16, 11, 28);
 
     for (var i = 0; i < 3; i++) {

@@ -43,7 +43,7 @@ function createScene(){
     createTree();
     createTree();
 
-    createSkydome(0, -3, 0);
+    createSkydome(0, -5, 0);
     createTerrain(0, -6.7, 0);
 
     //directional light
@@ -132,6 +132,7 @@ function createMaterials() {
     'use strict';
     const loader = new THREE.TextureLoader();
     const texture = loader.load ('https://web.tecnico.ulisboa.pt/~ist199238/heightmap1.png');
+    // js/heightmap/heightmap1.png
     materials.set("skydome", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide }));
     materials.set("terrain", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide, bumpMap: texture, bumpScale: 5, displacementMap: texture, displacementScale: 20}));
     // TODO: update house materials
@@ -465,7 +466,7 @@ function createStars() {
 function createDegrade() {
     'use strict';
     var degrade = new THREE.Object3D;
-    geometry = new THREE.PlaneGeometry(window.innerWidth, 50, 1, 1);
+    geometry = new THREE.PlaneGeometry(window.innerWidth, 55, 1, 1);
 
     let a = { r: 0.00, g: 0.0467, b: 0.280 } // Dark blue
     let b = { r: 0.224, g: 0.00, b: 0.280 }  // Dark purple

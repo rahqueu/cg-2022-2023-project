@@ -39,14 +39,14 @@ function createScene(){
     scene.background = new THREE.Color('#262626')
     scene.add(new THREE.AxesHelper(50));
 
-    createMoon(0, 30, 0);
+    createMoon(15, 27, 10);
     createOVNI(5, 23, 0);
     createHouse(0, 0, 0);
     createTree();
     createTree();
     createTree();
 
-    createSkydome(0, -7, 0);
+    createSkydome(0, -10, 0);
     createTerrain(0, -5.5, 0);
 
     //directional light
@@ -153,9 +153,9 @@ function createMaterials() {
     materials.set("cockpit", new THREE.MeshLambertMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
     materials.set("beam", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
     materials.set("light", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materials.set("wall", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }))
-    materials.set("window", new THREE.MeshLambertMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }))
-    materials.set("ceiling", new THREE.MeshLambertMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }))
+    materials.set("wall", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.FrontSide }))
+    materials.set("window", new THREE.MeshLambertMaterial({ color: 0x0000ff, wireframe: false, side: THREE.FrontSide }))
+    materials.set("ceiling", new THREE.MeshLambertMaterial({ color: 0xffa500, wireframe: false, side: THREE.FrontSide }))
     materials.set("tree trunk", new THREE.MeshLambertMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }))
     materials.set("tree foliage", new THREE.MeshLambertMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }))
     
@@ -173,9 +173,9 @@ function createToonMaterials() {
     materialsToon.set("cockpit", new THREE.MeshToonMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
     materialsToon.set("beam", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
     materialsToon.set("light", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materialsToon.set("wall", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materialsToon.set("window", new THREE.MeshToonMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }));
-    materialsToon.set("ceiling", new THREE.MeshToonMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }));
+    materialsToon.set("wall", new THREE.MeshToonMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.FrontSide }));
+    materialsToon.set("window", new THREE.MeshToonMaterial({ color: 0x0000ff, wireframe: false, side: THREE.FrontSide }));
+    materialsToon.set("ceiling", new THREE.MeshToonMaterial({ color: 0xffa500, wireframe: false, side: THREE.FrontSide }));
     materialsToon.set("tree trunk", new THREE.MeshToonMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }));
     materialsToon.set("tree foliage", new THREE.MeshToonMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }));
 }
@@ -188,9 +188,9 @@ function createLambertMaterials() {
     materialsLambert.set("cockpit", new THREE.MeshLambertMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
     materialsLambert.set("beam", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
     materialsLambert.set("light", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materialsLambert.set("wall", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }))
-    materialsLambert.set("window", new THREE.MeshLambertMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }))
-    materialsLambert.set("ceiling", new THREE.MeshLambertMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }))
+    materialsLambert.set("wall", new THREE.MeshLambertMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.FrontSide }))
+    materialsLambert.set("window", new THREE.MeshLambertMaterial({ color: 0x0000ff, wireframe: false, side: THREE.FrontSide }))
+    materialsLambert.set("ceiling", new THREE.MeshLambertMaterial({ color: 0xffa500, wireframe: false, side: THREE.FrontSide }))
     materialsLambert.set("tree trunk", new THREE.MeshLambertMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }))
     materialsLambert.set("tree foliage", new THREE.MeshLambertMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }))
 }
@@ -203,9 +203,9 @@ function createPhongMaterials() {
     materialsPhong.set("cockpit", new THREE.MeshPhongMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
     materialsPhong.set("beam", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
     materialsPhong.set("light", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materialsPhong.set("wall", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materialsPhong.set("window", new THREE.MeshPhongMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }));
-    materialsPhong.set("ceiling", new THREE.MeshPhongMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }));
+    materialsPhong.set("wall", new THREE.MeshPhongMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.FrontSide }));
+    materialsPhong.set("window", new THREE.MeshPhongMaterial({ color: 0x0000ff, wireframe: false, side: THREE.FrontSide }));
+    materialsPhong.set("ceiling", new THREE.MeshPhongMaterial({ color: 0xffa500, wireframe: false, side: THREE.FrontSide }));
     materialsPhong.set("tree trunk", new THREE.MeshPhongMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }));
     materialsPhong.set("tree foliage", new THREE.MeshPhongMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }));
 }
@@ -218,9 +218,9 @@ function createBasicMaterials() {
     materialsBasic.set("cockpit", new THREE.MeshBasicMaterial({ color: 0x808080, wireframe: false, side: THREE.DoubleSide }));
     materialsBasic.set("beam", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
     materialsBasic.set("light", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materialsBasic.set("wall", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.DoubleSide }));
-    materialsBasic.set("window", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false, side: THREE.DoubleSide }));
-    materialsBasic.set("ceiling", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false, side: THREE.DoubleSide }));
+    materialsBasic.set("wall", new THREE.MeshBasicMaterial({ color: 0xe8d6a2, wireframe: false, side: THREE.FrontSide }));
+    materialsBasic.set("window", new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: false, side: THREE.FrontSide }));
+    materialsBasic.set("ceiling", new THREE.MeshBasicMaterial({ color: 0xffa500, wireframe: false, side: THREE.FrontSide }));
     materialsBasic.set("tree trunk", new THREE.MeshBasicMaterial({ color: 0x8b4513, wireframe: false, side: THREE.DoubleSide }));
     materialsBasic.set("tree foliage", new THREE.MeshBasicMaterial({ color: 0x228b22, wireframe: false, side: THREE.DoubleSide }));
 }
@@ -486,7 +486,7 @@ function createDegrade() {
     var colors = new Float32Array([
         a.r, a.g, a.b,      // top left
         a.r, a.g, a.b,      // top right
-        a.r, a.g, a.b,      // bottom left
+        b.r, b.g, b.b,      // bottom left
         b.r, b.g, b.b ]);   // bottom right
 
     // Set the vertex colors
@@ -654,16 +654,16 @@ function createOVNILights() {
         
         geometry = new THREE.SphereGeometry(0.25, 25, 50, 0, 2 * Math.PI, 0, 0.5 * Math.PI);
         
-        var pointLight = new THREE.PointLight(0xFFFFFF, 0.1);
-        pointLight.position.set(0, 0, 0);
+        var pointLight = new THREE.PointLight(0xFFFFFF, 0.2);
+        pointLight.position.set(1.5, -0.5, 0);
         //const pointLightHelper = new THREE.PointLightHelper( pointLight, 1 );
         //scene.add(pointLightHelper);
 
         mesh = new THREE.Mesh(geometry, materials.get("light"));
         mesh.rotation.x = Math.PI;
-        mesh.add(pointLight);
         mesh.position.set(1.5, -0.25, 0);
 
+        pivot.add(pointLight);
         pivot.add(mesh);
     }
 }
@@ -1133,7 +1133,7 @@ function createHouse(x, y, z) {
 function updateLights() {
     'use strict';
     for (let i = 3; i < 11; i++) {
-    ovni.children[i].children[0].children[0].visible = !ovni.children[i].children[0].children[0].visible;
+    ovni.children[i].children[0].visible = !ovni.children[i].children[0].visible;
     }
 }
 
@@ -1214,10 +1214,8 @@ function update(delta) {
         movementVector.y -= 100;
     }
 
-    ovni.position.x += movementVector.x * delta;
-    ovni.position.z += movementVector.y * delta;
-    
-    //house.rotation.y += Math.PI / 8;
+    ovni.position.x += movementVector.x * delta * 0.1;
+    ovni.position.z += movementVector.y * delta * 0.1;
 }
 
 /////////////

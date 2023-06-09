@@ -65,11 +65,6 @@ function createScene(){
 
     //scene.add(ambientLight);
     //ambientLight.visible = true;    
-
-    console.log(ovni.children.length);
-    console.log(house.children.length);
-    console.log(moon.children.length);
-    console.log(tree.children.length);
 }
 
 function createTerrainScene() {
@@ -148,7 +143,7 @@ function createCameras() {
 function createMaterials() {
     'use strict';
     const loader = new THREE.TextureLoader();
-    const texture = loader.load ('js/heightmap/heightmap1.png');
+    const texture = loader.load ('https://web.tecnico.ulisboa.pt/~ist199238/heightmap.png');
 
     materials.set("skydome", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide }));
     materials.set("terrain", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide, bumpMap: texture, bumpScale: 5, displacementMap: texture, displacementScale: 20}));
@@ -535,66 +530,77 @@ function createTerrain(x, y, z) {
 function createTree() {
     'use strict';
 
-    tree = new THREE.Object3D();
-
-    //trunk
-    geometry = new THREE.CylinderGeometry(1, 1, 5, 25);
-    mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
-    tree.add(mesh);
-
-    //branch
-    geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 50);
-    mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
-    mesh.rotation.z = Math.PI/4; 
-    mesh.position.set(-1, 1.5, 0);
-    tree.add(mesh);
-
-    //branch
-    geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 50);
-    mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
-    mesh.rotation.z = -Math.PI/4; 
-    mesh.position.set(1, 2.5, 0);
-    tree.add(mesh);
-
-    //branch
-    geometry = new THREE.CylinderGeometry(0.25, 0.25, 2, 50);
-    mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
-    mesh.rotation.z = Math.PI/4; 
-    mesh.position.set(0.5, 4, 0);
-    tree.add(mesh);
-
-    //foliage
-    geometry = new THREE.SphereGeometry(1.5, 32, 16);
-    geometry.rotateZ(Math.PI/2);
-    geometry.scale(2, 1, 1);
-    mesh = new THREE.Mesh(geometry, materials.get("tree foliage"));
-    mesh.position.set(-4, 3, 0);
-    tree.add(mesh);
-
-    //foliage
-    geometry = new THREE.SphereGeometry(1.5, 32, 16);
-    geometry.rotateZ(Math.PI/2);
-    geometry.scale(2, 1, 1);
-    mesh = new THREE.Mesh(geometry, materials.get("tree foliage"));
-    mesh.position.set(1, 5, 0);
-    tree.add(mesh);
+    const ys = [THREE.MathUtils.randFloat(3.5, 8.5),
+        THREE.MathUtils.randFloat(3.5, 8.5),
+        THREE.MathUtils.randFloat(3.5, 8.5)];
 
     var spawnArea = new THREE.Box3(
-        new THREE.Vector3(-50, 0, -50), // Min coordinates of the spawn area
-        new THREE.Vector3(50, 0, 50)    // Max coordinates of the spawn area
+        new THREE.Vector3(-30, 0, -30), // Min coordinates of the spawn area
+        new THREE.Vector3(30, 0, 30)    // Max coordinates of the spawn area
       );
     
     const housePos = new THREE.Vector3(house.position.x - 4, 0, house.position.z - 7);
     var houseSize = new THREE.Vector3(16, 11, 28);
 
     for (var i = 0; i < 3; i++) {
+        var tree = new THREE.Object3D();
+
+        //trunk
+        geometry = new THREE.CylinderGeometry(1, 1, ys[i], 25);
+        mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
+        tree.add(mesh);
+
+        //branch
+        geometry = new THREE.CylinderGeometry(0.5, 0.5, ys[i] / 2, 50);
+        mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
+        mesh.rotation.z = Math.PI/4; 
+        mesh.position.set(-1, 1.5, 0);
+        tree.add(mesh);
+
+        //branch
+        geometry = new THREE.CylinderGeometry(0.5, 0.5, ys[i] / 2, 50);
+        mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
+        mesh.rotation.z = -Math.PI/4; 
+        mesh.position.set(1, 2.5, 0);
+        tree.add(mesh);
+
+        //branch
+        geometry = new THREE.CylinderGeometry(0.25, 0.25, ys[i] / 2, 50);
+        mesh = new THREE.Mesh(geometry, materials.get("tree trunk"));
+        mesh.rotation.z = Math.PI/4; 
+        mesh.position.set(0.5, ys[i] / 2 + 1, 0);
+        tree.add(mesh);
+
+        //foliage
+        geometry = new THREE.SphereGeometry(1.5, 32, 16);
+        geometry.rotateZ(Math.PI/2);
+        geometry.scale(2, 1, 1);
+        mesh = new THREE.Mesh(geometry, materials.get("tree foliage"));
+        mesh.position.set(-4, 2.5, 0);
+        tree.add(mesh);
+
+        //foliage
+        geometry = new THREE.SphereGeometry(1.5, 32, 16);
+        geometry.rotateZ(Math.PI/2);
+        geometry.scale(2, 1, 1);
+        mesh = new THREE.Mesh(geometry, materials.get("tree foliage"));
+        mesh.position.set(1, ys[i] / 2 + 2, 0);
+        tree.add(mesh);
+
+        trees.push(tree);
+    }
+
+    for (var i = 0; i < 3; i++) {
+
+        var tree = trees[i];
+        
         var isColliding = true;
         var randomPos;
 
         while (isColliding) {
             randomPos = new THREE.Vector3(
                 THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x),
-                2.5,
+                ys[i] / 2,
                 THREE.MathUtils.randFloat(spawnArea.min.z, spawnArea.max.z)
             )
 
@@ -620,8 +626,6 @@ function createTree() {
 
         treePos.push(randomPos);
     }
-
-    trees.push(tree);
 }
 
 function createMoon(x, y, z) {
@@ -711,15 +715,15 @@ function createWalls(x, y, z) {
     var wall = new THREE.Group();
 
     var vertices = new Float32Array([
-        0, 0, 0,  // 0
-        3, 0, 0,  // 1
-        3, 7, 0,  // 2
-        0, 7, 0   // 3
+        0, 0, 14,  // 0
+        3, 0, 14,  // 1
+        3, 7, 14,  // 2
+        0, 7, 14   // 3
     ]);
     
     var indices = new Uint32Array([
-        0, 2, 1,
-        0, 3, 2
+        0, 1, 2,
+        0, 2, 3
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -731,10 +735,10 @@ function createWalls(x, y, z) {
     wall.add(component);
 
     vertices = new Float32Array([
-        3, 0, 0,  // 0
-        5, 0, 0,  // 1
-        5, 3, 0,  // 2
-        0, 3, 0   // 3
+        3, 0, 14,  // 0
+        5, 0, 14,  // 1
+        5, 3, 14,  // 2
+        0, 3, 14   // 3
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -746,10 +750,10 @@ function createWalls(x, y, z) {
     wall.add(component);
 
     vertices = new Float32Array([
-        3, 5, 0,  // 0
-        5, 5, 0,  // 1
-        5, 7, 0,  // 2
-        0, 7, 0   // 3
+        3, 5, 14,  // 0
+        5, 5, 14,  // 1
+        5, 7, 14,  // 2
+        0, 7, 14   // 3
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -761,10 +765,10 @@ function createWalls(x, y, z) {
     wall.add(component);
 
     vertices = new Float32Array([
-        5, 0, 0,  // 0
-        8, 0, 0,  // 1
-        8, 7, 0,  // 2
-        5, 7, 0   // 3
+        5, 0, 14,  // 0
+        8, 0, 14,  // 1
+        8, 7, 14,  // 2
+        5, 7, 14   // 3
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -782,15 +786,15 @@ function createWalls(x, y, z) {
     var wall = new THREE.Group();
 
     vertices = new Float32Array([
-        0, 0, 14,  // 0
-        8, 0, 14,  // 1
-        8, 7, 14,  // 2
-        0, 7, 14   // 3
+        0, 0, 0,  // 0
+        8, 0, 0,  // 1
+        8, 7, 0,  // 2
+        0, 7, 0   // 3
     ]);
 
     var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
+        0, 2, 1,
+        0, 3, 2
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -808,15 +812,15 @@ function createWalls(x, y, z) {
     var wall = new THREE.Group();
 
     vertices = new Float32Array([
-        0, 0, 0,  // 0
-        0, 0, 2,  // 1
-        0, 4, 2,  // 2
-        0, 4, 0   // 3
+        8, 0, 0,  // 0
+        8, 0, 2,  // 1
+        8, 4, 2,  // 2
+        8, 4, 0   // 3
     ]);
 
     var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
+        0, 2, 1,
+        0, 3, 2
     ]);
     
     var g = new THREE.BufferGeometry();
@@ -828,10 +832,10 @@ function createWalls(x, y, z) {
     wall.add(component);
 
     vertices = new Float32Array([
-        0, 4, 0,  // 0
-        0, 4, 14,  // 1
-        0, 7, 14,  // 2
-        0, 7, 0   // 3
+        8, 4, 0,  // 0
+        8, 4, 14,  // 1
+        8, 7, 14,  // 2
+        8, 7, 0   // 3
     ]);
     
     var g = new THREE.BufferGeometry();
@@ -843,10 +847,10 @@ function createWalls(x, y, z) {
     wall.add(component);
 
     vertices = new Float32Array([
-        0, 0, 4,  // 0
-        0, 0, 6,  // 1
-        0, 4, 6,  // 2
-        0, 4, 4   // 3
+        8, 0, 4,  // 0
+        8, 0, 6,  // 1
+        8, 4, 6,  // 2
+        8, 4, 4   // 3
     ]);
     
     var g = new THREE.BufferGeometry();
@@ -858,10 +862,10 @@ function createWalls(x, y, z) {
     wall.add(component);
 
     vertices = new Float32Array([
-        0, 0, 6,  // 0
-        0, 0, 8,  // 1
-        0, 2, 8,  // 2
-        0, 2, 6   // 3
+        8, 0, 6,  // 0
+        8, 0, 8,  // 1
+        8, 2, 8,  // 2
+        8, 2, 6   // 3
     ]);
     
     var g = new THREE.BufferGeometry();
@@ -873,10 +877,10 @@ function createWalls(x, y, z) {
     wall.add(component);
 
     vertices = new Float32Array([
-        0, 0, 8,  // 0
-        0, 0, 10,  // 1
-        0, 4, 10,  // 2
-        0, 4, 8   // 3
+        8, 0, 8,  // 0
+        8, 0, 10,  // 1
+        8, 4, 10,  // 2
+        8, 4, 8   // 3
     ]);
     
     var g = new THREE.BufferGeometry();
@@ -888,10 +892,10 @@ function createWalls(x, y, z) {
     wall.add(component);
 
     vertices = new Float32Array([
-        0, 0, 10,  // 0
-        0, 0, 12,  // 1
-        0, 2, 12,  // 2
-        0, 2, 10   // 3
+        8, 0, 10,  // 0
+        8, 0, 12,  // 1
+        8, 2, 12,  // 2
+        8, 2, 10   // 3
     ]);
     
     var g = new THREE.BufferGeometry();
@@ -903,10 +907,10 @@ function createWalls(x, y, z) {
     wall.add(component);
 
     vertices = new Float32Array([
-        0, 0, 12,  // 0
-        0, 0, 14,  // 1
-        0, 4, 14,  // 2
-        0, 4, 12   // 3
+        8, 0, 12,  // 0
+        8, 0, 14,  // 1
+        8, 4, 14,  // 2
+        8, 4, 12   // 3
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -924,15 +928,15 @@ function createWalls(x, y, z) {
     var wall = new THREE.Group();
 
     vertices = new Float32Array([
-        8, 0, 0,  // 0
-        8, 0, 14,  // 1
-        8, 7, 14,  // 2
-        8, 7, 0   // 3
+        0, 0, 0,  // 0
+        0, 0, 14,  // 1
+        0, 7, 14,  // 2
+        0, 7, 0   // 3
     ]);
 
     var indices = new Uint32Array([
-        2, 1, 0,
-        3, 2, 0
+        0, 1, 2,
+        0, 2, 3
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -954,15 +958,15 @@ function createDoorAndWindows(x, y, z) {
     var deco = new THREE.Group();
 
     var vertices = new Float32Array([
-        0, 0, 2,  // 0
-        0, 0, 4,  // 1
-        0, 4, 4,  // 2
-        0, 4, 2   // 3
+        8, 0, 2,  // 0
+        8, 0, 4,  // 1
+        8, 4, 4,  // 2
+        8, 4, 2   // 3
     ]);
 
     var indices = new Uint32Array([
-        0, 1, 2,
-        0, 2, 3
+        0, 2, 1,
+        0, 3, 2
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -975,10 +979,10 @@ function createDoorAndWindows(x, y, z) {
 
     // WINDOWS
     vertices = new Float32Array([
-        0, 2, 6,  // 0
-        0, 2, 8,  // 1
-        0, 4, 8,  // 2
-        0, 4, 6   // 3
+        8, 2, 6,  // 0
+        8, 2, 8,  // 1
+        8, 4, 8,  // 2
+        8, 4, 6   // 3
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -990,10 +994,10 @@ function createDoorAndWindows(x, y, z) {
     deco.add(component);
 
     vertices = new Float32Array([
-        0, 2, 10,  // 0
-        0, 2, 12,  // 1
-        0, 4, 12,  // 2
-        0, 4, 10   // 3
+        8, 2, 10,  // 0
+        8, 2, 12,  // 1
+        8, 4, 12,  // 2
+        8, 4, 10   // 3
     ]);
 
     var g = new THREE.BufferGeometry();
@@ -1005,15 +1009,15 @@ function createDoorAndWindows(x, y, z) {
     deco.add(component);
 
     vertices = new Float32Array([
-        3, 3, 0,  // 0
-        5, 3, 0,  // 1
-        5, 5, 0,  // 2
-        3, 5, 0   // 3
+        3, 3, 14,  // 0
+        5, 3, 14,  // 1
+        5, 5, 14,  // 2
+        3, 5, 14   // 3
     ]);
 
     indices = new Uint32Array([
-        0, 2, 1,
-        0, 3, 2
+        0, 1, 2,
+        0, 2, 3
     ]);
 
     var g = new THREE.BufferGeometry();

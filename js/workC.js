@@ -39,14 +39,14 @@ function createScene(){
     scene.background = new THREE.Color('#262626')
     scene.add(new THREE.AxesHelper(50));
 
-    createMoon(0, 28, 0);
+    createMoon(0, 30, 0);
     createOVNI(5, 23, 0);
     createHouse(0, 0, 0);
     createTree();
     createTree();
     createTree();
 
-    createSkydome(0, -8, 0);
+    createSkydome(0, -7, 0);
     createTerrain(0, -5.5, 0);
 
     //directional light
@@ -79,7 +79,7 @@ function createTerrainScene() {
     
     renderer.setRenderTarget(null);
     
-    bufferTextureTerrain.texture.repeat.set(2,2);
+    bufferTextureTerrain.texture.repeat.set(3,3);
     materials.get("terrain").map = bufferTextureTerrain.texture;
     materials.get("terrain").needsUpdate = true;
 
@@ -96,7 +96,7 @@ function createSkyScene() {
     renderer.render(bufferSceneSky, cameras[1]);
     renderer.setRenderTarget(null);
     
-    bufferTextureSky.texture.repeat.set(2 , 2);
+    bufferTextureSky.texture.repeat.set(10 , 1);
     materials.get("skydome").map = bufferTextureSky.texture;
     materials.get("skydome").needsUpdate = true;
 }
@@ -470,7 +470,7 @@ function createStars() {
         var mat = new THREE.MeshBasicMaterial({color: 0xffffff, wireframe: false, side: THREE.DoubleSide}); 
         mesh = new THREE.Mesh(geometry, mat);
         star.add(mesh);
-        handlePosition(0.2 * 0.2, stars, star, i);
+        handlePosition(0.1 * 0.1, stars, star, i);
         bufferSceneSky.add(star);
     }
 }
@@ -486,7 +486,7 @@ function createDegrade() {
     var colors = new Float32Array([
         a.r, a.g, a.b,      // top left
         a.r, a.g, a.b,      // top right
-        b.r, b.g, b.b,      // bottom left
+        a.r, a.g, a.b,      // bottom left
         b.r, b.g, b.b ]);   // bottom right
 
     // Set the vertex colors
@@ -1170,8 +1170,8 @@ function checkCollisions(obj, tempX, tempY, r) {
 function handlePosition(radius, objs, obj, numObjs) {
     'use strict';
     var spawnArea = new THREE.Box3(
-        new THREE.Vector3(-30, -14, 0), // Min coordinates of the spawn area
-        new THREE.Vector3(30, 14, 0)    // Max coordinates of the spawn area
+        new THREE.Vector3(-35, -16, 0), // Min coordinates of the spawn area
+        new THREE.Vector3(35, 16, 0)    // Max coordinates of the spawn area
     );
     var tempX = THREE.MathUtils.randFloat(spawnArea.min.x, spawnArea.max.x);
     var tempY = THREE.MathUtils.randFloat(spawnArea.min.y, spawnArea.max.y);
@@ -1296,16 +1296,16 @@ function onKeyDown(e) {
             createSkyScene();
             break;
         case 51: // 3
-            camera = cameras[2];
-            break;
-        case 52: // 4
-            camera = cameras[3];
-            break;
-        case 53: // 5
             camera = cameras[4];
             break;
-        case 54: // 6
+        case 52: // 4
+            camera = cameras[2];
+            break;
+        case 53: // 5
             camera = cameras[0];
+            break;
+        case 54: // 6
+            camera = cameras[1];
             break;
         case 37: // arrow
         case 38: // arrow

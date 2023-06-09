@@ -1,5 +1,3 @@
-//import { VRButton } from 'three/addons/webxr/VRButton.js';
-
 //////////////////////
 /* GLOBAL VARIABLES */
 //////////////////////
@@ -36,18 +34,17 @@ function createScene(){
     'use strict';
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color('#262626')
-    scene.add(new THREE.AxesHelper(50));
+    scene.background = new THREE.Color('#262626');
 
-    createMoon(15, 27, 10);
+    createMoon(20, 29, -3);
     createOVNI(5, 23, 0);
     createHouse(0, 0, 0);
     createTree();
     createTree();
     createTree();
 
-    createSkydome(0, -5, 0);
-    createTerrain(0, -6.5, 0);
+    createSkydome(0, -3, 0);
+    createTerrain(0, -6.7, 0);
 
     //directional light
     globalLight.position.set(moon.position.x, moon.position.y, moon.position.z);
@@ -56,12 +53,7 @@ function createScene(){
     scene.add(globalLight);
     scene.add(globalLight.target);
 
-    //const globalLightHelper = new THREE.PointLightHelper( globalLight, 1 );
-    //scene.add(globalLightHelper);
-
     //ambient light
-    //const ambientLightHelper = new THREE.PointLightHelper( ambientLight, 1 );
-    //scene.add(ambientLightHelper);
     scene.add(ambientLight);
     ambientLight.visible = true;    
 }
@@ -74,10 +66,8 @@ function createTerrainScene() {
     createFlowers();
     
     renderer.setRenderTarget(bufferTextureTerrain);
-    renderer.render(bufferSceneTerrain, cameras[1]);
-    
+    renderer.render(bufferSceneTerrain, cameras[0]);
     renderer.setRenderTarget(null);
-    renderer.setSize(window.innerWidth, window.innerHeight);
     bufferTextureTerrain.texture.repeat.set(3, 3);
     materials.get("terrain").map = bufferTextureTerrain.texture;
     materials.get("terrain").needsUpdate = true;
@@ -92,7 +82,7 @@ function createSkyScene() {
     createStars();
     
     renderer.setRenderTarget(bufferTextureSky);
-    renderer.render(bufferSceneSky, cameras[1]);
+    renderer.render(bufferSceneSky, cameras[0]);
     renderer.setRenderTarget(null)
     bufferTextureSky.texture.repeat.set(4 , 1);
     materials.get("skydome").map = bufferTextureSky.texture;
@@ -104,15 +94,11 @@ function createSkyScene() {
 //////////////////////
 function createCameras() {
     'use strict';
-    const positions = new Array(new Array(-50, 0, 0), // frontal
-                                new Array(0, 0, -50), // lateral
-                                new Array(0, 50, 0), // baixo
-                                new Array(100, 200, 100), // perspetiva isométrica - projeção ortogonal
-                                new Array(35, 25, 35), // perspetiva isométrica - projeção perspetiva
-                                new Array(-50, 100, -50)); // perspetiva isométrica - projeção perspetiva
+    const positions = new Array(new Array(0, 0, -50), // lateral (criação de texturas)
+                                new Array(35, 25, 35)); // perspetiva isométrica - projeção ortogonal (cena principal); 
 
-    for (let i = 0; i < 6; i++) {
-        if (i == 4 | i == 5) {
+    for (let i = 0; i < 2; i++) {
+        if (i == 1) {
             camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
         } else {
             camera = new THREE.OrthographicCamera(window.innerWidth / -50,
@@ -127,20 +113,16 @@ function createCameras() {
         camera.lookAt(scene.position);
         cameras.push(camera);
     }
-    camera = cameras[4];
+    camera = cameras[1];
     
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.maxDistance = 20;
-    controls.target.x = 35;
+    controls.target.x = 25;
     controls.target.y = 20;
-    controls.target.z = 35;
+    controls.target.z = 25;
     controls.update();
     
 }
-
-/////////////////////
-/* CREATE LIGHT(S) */
-/////////////////////
 
 ////////////////////////
 /* CREATE OBJECT3D(S) */
@@ -149,8 +131,7 @@ function createCameras() {
 function createMaterials() {
     'use strict';
     const loader = new THREE.TextureLoader();
-    const texture = loader.load ('js/heightmap/heightmap1.png');
-
+    const texture = loader.load ('https://web.tecnico.ulisboa.pt/~ist199238/heightmap1.png');
     materials.set("skydome", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide }));
     materials.set("terrain", new THREE.MeshPhongMaterial({wireframe: false, side: THREE.DoubleSide, bumpMap: texture, bumpScale: 5, displacementMap: texture, displacementScale: 20}));
     // TODO: update house materials
@@ -445,7 +426,7 @@ function updateMaterials() {
 function createFlowers() {
     'use strict';
     let colors = [];
-    colors[0] = 0xffffff; // white
+    colors[0] = 0xffffff; //white
     colors[1] = 0xFFEA00; //yellow
     colors[2] = 0xC8A2C8; //lilac
     colors[3] = 0x89cff0; //baby blue
@@ -501,8 +482,8 @@ function createDegrade() {
     var material = new THREE.MeshBasicMaterial({ vertexColors: true, wireframe: false, side: THREE.DoubleSide});
     mesh = new THREE.Mesh(geometry, material);
     degrade.add(mesh);
-    degrade.position.set(0, 200, 0);
-    bufferSceneSky.add(mesh);
+    degrade.position.set(0, 0, 0);
+    bufferSceneSky.add(degrade);
 }
 
 function createSkydome(x, y , z) {
@@ -662,8 +643,6 @@ function createOVNILights() {
         
         var pointLight = new THREE.PointLight(0xFFFFFF, 0.15, 40, 1.5);
         pointLight.position.set(0, 0, 0);
-        //const pointLightHelper = new THREE.PointLightHelper( pointLight, 1 );
-        //scene.add(pointLightHelper);
 
         mesh = new THREE.Mesh(geometry, materials.get("light"));
         mesh.rotation.x = Math.PI;
@@ -702,9 +681,6 @@ function createOVNI(x, y, z) {
     mesh.position.set(0, -0.45, 0);
     mesh.add(spotLight);
     mesh.add(spotLight.target);
-
-    //const spotLightHelper = new THREE.PointLightHelper( spotLight, 1 );
-    //scene.add(spotLightHelper);
 
     ovni.add(mesh);
     
@@ -1302,16 +1278,7 @@ function onKeyDown(e) {
             createSkyScene();
             break;
         case 51: // 3
-            camera = cameras[4];
-            break;
-        case 52: // 4
-            camera = cameras[2];
-            break;
-        case 53: // 5
             camera = cameras[0];
-            break;
-        case 54: // 6
-            camera = cameras[5];
             break;
         case 37: // arrow
         case 38: // arrow

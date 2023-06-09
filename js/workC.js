@@ -536,12 +536,12 @@ function createTerrain(x, y, z) {
 function createTree() {
     'use strict';
 
-    const ys = [THREE.MathUtils.randFloat(3.5, 8.5),
-        THREE.MathUtils.randFloat(3.5, 8.5),
-        THREE.MathUtils.randFloat(3.5, 8.5)];
+    const ys = [THREE.MathUtils.randFloat(5.5, 8.5),
+        THREE.MathUtils.randFloat(5.5, 8.5),
+        THREE.MathUtils.randFloat(5.5, 8.5)];
 
     var spawnArea = new THREE.Box3(
-        new THREE.Vector3(-30, 0, -30), // Min coordinates of the spawn area
+        new THREE.Vector3(-30, 0, -15), // Min coordinates of the spawn area
         new THREE.Vector3(30, 0, 30)    // Max coordinates of the spawn area
       );
     
